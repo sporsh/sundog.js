@@ -8,7 +8,7 @@ export const rayThrough = ({
     fieldOfView,
     focalLength
 }) => (u, v) => {
-    const origin = add(position, randomOriginWithinAperture(aperture))
+    const origin = randomOriginWithinAperture({ position, aperture })
     const target = add(
         position,
         fromStandardBasis(basis, {
@@ -21,9 +21,13 @@ export const rayThrough = ({
     return { origin, direction }
 }
 
-const randomOriginWithinAperture = r => {
-    const { x, y } = randomPointOnDisc(r)
-    return { x, y, z: 0 }
+const randomOriginWithinAperture = ({ position, aperture }) => {
+    if (aperture == 0) {
+        return position
+    } else {
+        const { x, y } = randomPointOnDisc(aperture)
+        return add(position, { x, y, z: 0 })
+    }
 }
 
 const randomPointOnDisc = r =>
