@@ -8,19 +8,22 @@ export const fromStandardBasis = ({ tangent, bitangent, normal }, v) => ({
     z: dot(v, normal)
 })
 
-const toStandardBasis = ({ tangent, bitangent, normal }, { x, y, z }) => ({
+export const toStandardBasis = (
+    { tangent, bitangent, normal },
+    { x, y, z }
+) => ({
     x: tangent.x * x + normal.x * y + bitangent.x * z,
     y: tangent.y * x + normal.y * y + bitangent.y * z,
     z: tangent.z * x + normal.z * y + bitangent.z * z
 })
 
-const arbitraryBasisForNormal = normal => {
+export const arbitraryBasisForNormal = normal => {
     const tangent = orthogonalUnitVector(normal)
-    basis(tangent, cross(tangent, normal), normal)
+    return basis(tangent, cross(tangent, normal), normal)
 }
 
 const orthogonalUnitVector = ({ x, y, z }) => {
-    if (x == 0) {
+    if (x === 0) {
         return {
             x: 1,
             y: 0,
