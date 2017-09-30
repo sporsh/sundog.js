@@ -7,7 +7,7 @@ export const fromXYZ = (x, y, z) => ({
 export const add = (a, b) => fromXYZ(a.x + b.x, a.y + b.y, a.z + b.z)
 
 export const cross = (a, b) => ({
-    x: a.x * b.z - a.z * b.y,
+    x: a.y * b.z - a.z * b.y,
     y: a.z * b.x - a.x * b.z,
     z: a.x * b.y - a.y * b.x
 })
@@ -27,3 +27,5 @@ export const scale = ({ x, y, z }, f) => fromXYZ(x * f, y * f, z * f)
 export const sub = (a, b) => fromXYZ(a.x - b.x, a.y - b.y, a.z - b.z)
 
 export const ZERO = fromXYZ(0, 0, 0)
+
+export const hadamard = (a, b) => fromXYZ(a.x * b.x, a.y * b.y, a.z * b.z)
