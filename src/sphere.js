@@ -1,9 +1,13 @@
-import { sub, dot, length2 } from './vector3.js'
+import { add, sub, scale, dot, length2, normalize } from './vector3.js'
+import { arbitraryBasisForNormal } from './basis.js'
 
-export const intersectSphereRay = ({ center, radius }) => ({
+export const intersectSphereRay = sphere => ({
     origin,
-    direction
+    direction,
+    tMin = 0,
+    tMax = Infinity
 }) => {
+    const { center, radius } = sphere
     // Vector pointing from sphere center to ray origin
     const m = sub(origin, center)
 
@@ -29,11 +33,17 @@ export const intersectSphereRay = ({ center, radius }) => ({
     }
 
     const sqrtDiscr = Math.sqrt(discr)
-    const t = -b - sqrtDiscr
-    if (t < 0) {
-        // Intersection was behind ray origin
-        // We must be inside the spehre, so find the other intersection point infront of us
-        return -b + sqrtDiscr
+    const t0 = -b - sqrtDiscr
+    // t0 < 0  (intersection was behind ray origin, we're inside the sphere so try the other solution)
+    const t = t0 < tMin ? -b + sqrtDiscr : t0
+    if (t > tMin && t < tMax) {
+        const point = add(origin, scale(direction, t))
+        const normal = normalize(sub(point, center))
+        return {
+            t,
+            point,
+            basis: arbitraryBasisForNormal(normal),
+            intersectable: sphere
+        }
     }
-    return t
 }
