@@ -1,6 +1,19 @@
-import { fromXYZ, negate } from './src/vector3.js'
+import {
+    fromXYZ,
+    negate,
+    add,
+    sub,
+    scale,
+    normalize,
+    hadamard
+} from './src/vector3.js'
+import { arbitraryBasisForNormal } from './src/basis.js'
 import { rayThrough } from './src/camera.js'
 import { intersectSphereRay } from './src/sphere.js'
+import { fromV3, toAbgr32 } from './src/color.js'
+import { lambertianMaterial, specularMaterial } from './src/material.js'
+import { intersectGroupRay } from './src/group.js'
+import { intersectPlaneRay } from './src/plane.js'
 
 const canvas = document.createElement('canvas')
 canvas.width = canvas.height = 256
@@ -14,10 +27,10 @@ const halfWidth = Math.floor(imageData.width / 2)
 const halfHeight = Math.floor(imageData.height / 2)
 
 const camera = {
-    position: fromXYZ(0, 0, -1),
+    position: fromXYZ(0, 0, -2),
     basis: {
         tangent: fromXYZ(1, 0, 0),
-        bitangent: fromXYZ(0, 1, 0),
+        bitangent: fromXYZ(0, -1, 0),
         normal: fromXYZ(0, 0, 1)
     },
     aperture: 0,
@@ -25,10 +38,72 @@ const camera = {
     focalLength: 1
 }
 
-const scene = {
-    center: fromXYZ(0, 0, 0),
-    radius: 0.5
+const material = {
+    light: lambertianMaterial({
+        albedo: fromXYZ(1, 1, 1),
+        emittance: fromXYZ(10, 10, 10)
+    }),
+    dimLight: lambertianMaterial({
+        albedo: fromXYZ(1, 1, 1),
+        emittance: fromXYZ(1, 1, 1)
+    }),
+    mirror: specularMaterial({
+        albedo: fromXYZ(1, 1, 1)
+    }),
+    white: lambertianMaterial({
+        albedo: fromXYZ(0.8, 0.8, 0.8)
+    }),
+    red: lambertianMaterial({
+        albedo: fromXYZ(0.75, 0.25, 0.25)
+    }),
+    green: lambertianMaterial({
+        albedo: fromXYZ(0.25, 0.75, 0.25)
+    })
 }
+
+const intersectRay = intersectGroupRay([
+    intersectSphereRay({
+        center: fromXYZ(0, -1, 0),
+        radius: 0.25,
+        material: material.light
+    }),
+    intersectSphereRay({
+        center: fromXYZ(0, 0, 0),
+        radius: 3,
+        material: material.dimLight
+    }),
+    intersectSphereRay({
+        center: fromXYZ(0, 0.5, 0),
+        radius: 0.5,
+        material: material.mirror
+    }),
+    // WALLS
+    intersectPlaneRay({
+        d: -1,
+        basis: arbitraryBasisForNormal(fromXYZ(1, 0, 0)),
+        material: material.red
+    }),
+    intersectPlaneRay({
+        d: -1,
+        basis: arbitraryBasisForNormal(fromXYZ(-1, 0, 0)),
+        material: material.green
+    }),
+    intersectPlaneRay({
+        d: -1,
+        basis: arbitraryBasisForNormal(fromXYZ(0, 1, 0)),
+        material: material.white
+    }),
+    intersectPlaneRay({
+        d: -1,
+        basis: arbitraryBasisForNormal(fromXYZ(0, -1, 0)),
+        material: material.white
+    }),
+    intersectPlaneRay({
+        d: -1,
+        basis: arbitraryBasisForNormal(fromXYZ(0, 0, -1)),
+        material: material.white
+    })
+])
 
 const renderRegion = (x0, y0, x1, y1) => {
     const dx = x1 - x0
@@ -37,50 +112,66 @@ const renderRegion = (x0, y0, x1, y1) => {
         for (let x = x0; x < x1; x++) {
             const u = x / halfWidth - 1
             const v = y / halfHeight - 1
-            const ray = cameraRayThrough(u, v)
-            const color = trace(ray, fromXYZ(0, 0, 0), fromXYZ(1, 1, 1), 0)
-            setColor(x, y, color)
+            let radiance = fromXYZ(0, 0, 0)
+            let n = 0
+            for (; n < 100; n++) {
+                const ray = cameraRayThrough(u, v)
+                radiance = add(
+                    radiance,
+                    trace(ray, fromXYZ(0, 0, 0), fromXYZ(1, 1, 1), 0)
+                )
+            }
+            setColor(x, y, fromV3(scale(radiance, 1 / n)))
         }
     }
     ctx.putImageData(imageData, 0, 0)
 }
 
+const sample = (color, n) => add(color, trace)
+
 const cameraRayThrough = rayThrough(camera)
 
+const epsilon = 0.0001
+
 const trace = (ray, radiance, weight, depth) => {
-    const t = intersectRay(ray)
-    if (t > 0) {
+    const intersection = intersectRay(ray)
+    if (intersection) {
+        const {
+            t,
+            point,
+            normal,
+            basis,
+            intersectable: { material: { pdf, emittance, scatter } }
+        } = intersection
         const out = negate(ray.direction)
-        const prob = ReflectancePDF(material, out, i.basis)
-        // const pMax = Math.max(Math.max(prob.x, prob.y), prob.z)
+        const prob = pdf(out, basis)
+        const pMax = Math.max(Math.max(prob.x, prob.y), prob.z)
+
+        const newRadiance = add(radiance, hadamard(emittance(out), weight))
 
         //  Russian roulette (after a couple of bounces)
         if (depth > 2 && Math.random() <= pMax) {
-            return radiance
+            return newRadiance
         }
 
-        const newWeight = hadamard(weight, scale(prob, 1 / pMax))
         const newRay = {
-            origin: i.point,
-            direction: reflect(out, i.basis)
+            origin: point,
+            direction: scatter(out, basis),
+            tMin: epsilon,
+            tMax: Infinity
         }
-        return trace(newRay, radiance, newWeight, depth + 1)
+        const newWeight = hadamard(weight, scale(prob, 1 / pMax))
+        return trace(newRay, newRadiance, newWeight, depth + 1)
     } else {
         return radiance
     }
 }
-const intersectRay = intersectSphereRay(scene)
 
 const setColor = (x, y, color) => {
     const i = x + y * imageData.width
     imageData32[i] = toAbgr32(color)
 }
 
-const toAbgr32 = ({ r, g, b }) =>
-    0xff000000 |
-    (Math.min(0xff, b * 0xff) << 16) |
-    (Math.min(0xff, g * 0xff) << 8) |
-    Math.min(0xff, r * 0xff)
-
-renderRegion(0, 0, halfWidth, halfHeight)
-renderRegion(halfWidth, halfHeight, halfWidth * 2, halfHeight * 2)
+// renderRegion(0, 0, halfWidth, halfHeight)
+// renderRegion(halfWidth, halfHeight, halfWidth * 2, halfHeight * 2)
+renderRegion(0, 0, halfWidth * 2, halfHeight * 2)
