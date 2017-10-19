@@ -11,12 +11,16 @@ import { arbitraryBasisForNormal } from './src/basis.js'
 import { rayThrough } from './src/camera.js'
 import { intersectSphereRay } from './src/sphere.js'
 import { fromV3, toAbgr32 } from './src/color.js'
-import { lambertianMaterial, specularMaterial } from './src/material.js'
+import {
+    lambertianMaterial,
+    specularMaterial,
+    transmissiveMaterial
+} from './src/material.js'
 import { intersectGroupRay } from './src/group.js'
 import { intersectPlaneRay } from './src/plane.js'
 
 const canvas = document.createElement('canvas')
-canvas.width = canvas.height = 256
+canvas.width = canvas.height = 400
 document.body.appendChild(canvas)
 
 const ctx = canvas.getContext('2d')
@@ -27,15 +31,15 @@ const halfWidth = Math.floor(imageData.width / 2)
 const halfHeight = Math.floor(imageData.height / 2)
 
 const camera = {
-    position: fromXYZ(0, 0, -2),
+    position: fromXYZ(0, 0, -4),
     basis: {
         tangent: fromXYZ(1, 0, 0),
         bitangent: fromXYZ(0, -1, 0),
         normal: fromXYZ(0, 0, 1)
     },
     aperture: 0,
-    fieldOfView: 1,
-    focalLength: 1
+    fieldOfView: 0.35,
+    focalLength: 5
 }
 
 const material = {
@@ -44,11 +48,15 @@ const material = {
         emittance: fromXYZ(10, 10, 10)
     }),
     dimLight: lambertianMaterial({
-        albedo: fromXYZ(1, 1, 1),
-        emittance: fromXYZ(1, 1, 1)
+        albedo: fromXYZ(0, 0, 0),
+        emittance: fromXYZ(0.6, 0.8, 1)
     }),
     mirror: specularMaterial({
         albedo: fromXYZ(1, 1, 1)
+    }),
+    glass: transmissiveMaterial({
+        albedo: fromXYZ(1, 1, 1),
+        refractiveIndex: 1.6
     }),
     white: lambertianMaterial({
         albedo: fromXYZ(0.8, 0.8, 0.8)
@@ -62,20 +70,33 @@ const material = {
 }
 
 const intersectRay = intersectGroupRay([
+    // LISGHTS
     intersectSphereRay({
-        center: fromXYZ(0, -1, 0),
+        center: fromXYZ(0, 1, 0),
         radius: 0.25,
         material: material.light
     }),
+    // intersectSphereRay({
+    //     center: fromXYZ(0, 0, 0),
+    //     radius: 4,
+    //     material: material.dimLight
+    // }),
+    // OBJECTS
+    // intersectSphereRay({
+    //     center: fromXYZ(-0.5, -0.5, 0.5),
+    //     radius: 0.5,
+    //     material: material.white
+    // }),
+    // intersectPlaneRay({
+    //     d: -0.5,
+    //     basis: arbitraryBasisForNormal(fromXYZ(0, 1, 0)),
+    //     material: material.glass
+    // }),
     intersectSphereRay({
-        center: fromXYZ(0, 0, 0),
-        radius: 3,
-        material: material.dimLight
-    }),
-    intersectSphereRay({
-        center: fromXYZ(0, 0.5, 0),
-        radius: 0.5,
-        material: material.mirror
+        // center: fromXYZ(0.5, -0.5, 0),
+        center: fromXYZ(0.75, -0.75, 0),
+        radius: 0.25,
+        material: material.glass
     }),
     // WALLS
     intersectPlaneRay({
@@ -88,16 +109,19 @@ const intersectRay = intersectGroupRay([
         basis: arbitraryBasisForNormal(fromXYZ(-1, 0, 0)),
         material: material.green
     }),
+    // FLOOR
     intersectPlaneRay({
         d: -1,
         basis: arbitraryBasisForNormal(fromXYZ(0, 1, 0)),
         material: material.white
     }),
+    // CEILING
     intersectPlaneRay({
         d: -1,
         basis: arbitraryBasisForNormal(fromXYZ(0, -1, 0)),
         material: material.white
     }),
+    // BACK WALL
     intersectPlaneRay({
         d: -1,
         basis: arbitraryBasisForNormal(fromXYZ(0, 0, -1)),
@@ -105,7 +129,7 @@ const intersectRay = intersectGroupRay([
     })
 ])
 
-const renderRegion = (x0, y0, x1, y1) => {
+const renderRegion = (spp, x0, y0, x1, y1) => {
     const dx = x1 - x0
     const dy = y1 - y0
     for (let y = y0; y < y1; y++) {
@@ -113,15 +137,17 @@ const renderRegion = (x0, y0, x1, y1) => {
             const u = x / halfWidth - 1
             const v = y / halfHeight - 1
             let radiance = fromXYZ(0, 0, 0)
-            let n = 0
-            for (; n < 100; n++) {
-                const ray = cameraRayThrough(u, v)
+            for (let n = spp; n > 0; n--) {
+                const ray = cameraRayThrough(
+                    u + (2 * Math.random() - 1) / dx,
+                    v + (2 * Math.random() - 1) / dy
+                )
                 radiance = add(
                     radiance,
                     trace(ray, fromXYZ(0, 0, 0), fromXYZ(1, 1, 1), 0)
                 )
             }
-            setColor(x, y, fromV3(scale(radiance, 1 / n)))
+            setColor(x, y, fromV3(scale(radiance, 1 / spp)))
         }
     }
     ctx.putImageData(imageData, 0, 0)
@@ -150,7 +176,7 @@ const trace = (ray, radiance, weight, depth) => {
         const newRadiance = add(radiance, hadamard(emittance(out), weight))
 
         //  Russian roulette (after a couple of bounces)
-        if (depth > 2 && Math.random() <= pMax) {
+        if (pMax <= 0 || (depth > 2 && Math.random() > pMax)) {
             return newRadiance
         }
 
@@ -172,6 +198,7 @@ const setColor = (x, y, color) => {
     imageData32[i] = toAbgr32(color)
 }
 
-// renderRegion(0, 0, halfWidth, halfHeight)
-// renderRegion(halfWidth, halfHeight, halfWidth * 2, halfHeight * 2)
-renderRegion(0, 0, halfWidth * 2, halfHeight * 2)
+renderRegion(10, 0, 0, halfWidth * 2, halfHeight)
+renderRegion(10, 0, halfHeight, halfWidth, halfHeight * 2)
+renderRegion(100, halfWidth, halfHeight, halfWidth * 2, halfHeight * 2)
+// renderRegion(spp, 0, 0, halfWidth * 2, halfHeight * 2)
