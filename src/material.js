@@ -1,7 +1,7 @@
 import { ZERO, normalize, negate, scale, sub, dot } from './vector3.js'
 import { toStandardBasis } from './basis.js'
 
-const lambertianScatter = (outgoing, surface) => {
+const lambertianScatter = (incoming, surface) => {
     const u1 = Math.random()
     const u2 = Math.random()
 
@@ -34,8 +34,8 @@ export const lambertianMaterial = ({ albedo, emittance = ZERO }) => ({
 
 export const specularMaterial = ({ albedo, emittance = ZERO }) => ({
     pdf: () => albedo,
-    scatter: (outgoing, { normal }) =>
-        sub(scale(normal, 2 * Math.max(0, dot(normal, outgoing))), outgoing),
+    scatter: (incoming, { normal }) =>
+        sub(incoming, scale(normal, 2 * dot(normal, incoming))),
     emittance: () => emittance
 })
 
@@ -45,8 +45,7 @@ export const transmissiveMaterial = ({
     refractiveIndex
 }) => ({
     pdf: () => albedo,
-    scatter: (outgoing, { normal }) => {
-        const incoming = negate(outgoing)
+    scatter: (incoming, { normal }) => {
         const cosi = dot(normal, incoming)
         const eta =
             cosi < 0

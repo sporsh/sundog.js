@@ -169,11 +169,13 @@ const trace = (ray, radiance, weight, depth) => {
             basis,
             intersectable: { material: { pdf, emittance, scatter } }
         } = intersection
-        const out = negate(ray.direction)
-        const prob = pdf(out, basis)
+        const prob = pdf(ray.direction, basis)
         const pMax = Math.max(Math.max(prob.x, prob.y), prob.z)
 
-        const newRadiance = add(radiance, hadamard(emittance(out), weight))
+        const newRadiance = add(
+            radiance,
+            hadamard(emittance(ray.direction), weight)
+        )
 
         //  Russian roulette (after a couple of bounces)
         if (pMax <= 0 || (depth > 2 && Math.random() > pMax)) {
@@ -182,7 +184,7 @@ const trace = (ray, radiance, weight, depth) => {
 
         const newRay = {
             origin: point,
-            direction: scatter(out, basis),
+            direction: scatter(ray.direction, basis),
             tMin: epsilon,
             tMax: Infinity
         }
