@@ -158,6 +158,7 @@ const sample = (color, n) => add(color, trace)
 const cameraRayThrough = rayThrough(camera)
 
 const epsilon = 0.0001
+const maxDepth = 8
 
 const trace = (ray, radiance, weight, depth) => {
     const intersection = intersectRay(ray)
@@ -178,7 +179,11 @@ const trace = (ray, radiance, weight, depth) => {
         )
 
         //  Russian roulette (after a couple of bounces)
-        if (pMax <= 0 || (depth > 2 && Math.random() > pMax)) {
+        if (
+            depth > maxDepth ||
+            pMax <= 0 ||
+            (depth > 2 && Math.random() > pMax)
+        ) {
             return newRadiance
         }
 

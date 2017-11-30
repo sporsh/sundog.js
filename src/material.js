@@ -62,7 +62,7 @@ export const transmissiveMaterial = ({
         const cost2 = 1 - eta * eta * (1 - cosi * cosi)
         if (cost2 < 0) {
             // Total internal reflection
-            return sub(incoming, scale(normal_, 2.0 * cosi))
+            return sub(incoming, scale(normal_, 2 * cosi))
         }
         return normalize(
             sub(
