@@ -46,26 +46,29 @@ export const transmissiveMaterial = ({
 }) => ({
     pdf: () => albedo,
     scatter: (outgoing, { normal }) => {
-        outgoing = negate(outgoing)
-        let eta
-        let cosi = dot(normal, outgoing)
-        if (cosi < 0) {
-            // Entering
-            eta = 1 / refractiveIndex
-        } else {
-            // Exiting
-            eta = refractiveIndex / 1
-            normal = negate(normal)
-        }
+        const incoming = negate(outgoing)
+        const cosi = dot(normal, incoming)
+        const eta =
+            cosi < 0
+                ? // Entering
+                  1 / refractiveIndex
+                : // Exiting
+                  refractiveIndex / 1
+        const normal_ =
+            cosi < 0
+                ? // Entering
+                  normal
+                : // Exiting
+                  negate(normal)
         const cost2 = 1 - eta * eta * (1 - cosi * cosi)
         if (cost2 < 0) {
             // Total internal reflection
-            return sub(outgoing, scale(normal, 2.0 * cosi))
+            return sub(incoming, scale(normal_, 2.0 * cosi))
         }
         return normalize(
             sub(
-                scale(outgoing, eta),
-                scale(normal, eta * Math.abs(cosi) + Math.sqrt(cost2))
+                scale(incoming, eta),
+                scale(normal_, eta * Math.abs(cosi) + Math.sqrt(cost2))
             )
         )
     },
