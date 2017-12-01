@@ -1,6 +1,7 @@
 module.exports = {
-    entry: './main.js',
+    entry: { main: './main.js', worker: './worker.js' },
     output: {
-        filename: 'dist/sundog.js'
+        filename: '[name].js',
+        path: __dirname + '/dist'
     }
 }

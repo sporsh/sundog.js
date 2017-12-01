@@ -18,7 +18,7 @@ export const rayThrough = ({
         })
     )
     const direction = normalize(sub(target, origin))
-    return { origin, direction }
+    return { origin, direction, tMin: 0, tMax: Infinity }
 }
 
 const randomOriginWithinAperture = ({ position, aperture }) => {

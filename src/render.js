@@ -24,8 +24,8 @@ export const renderRegion = (trace, cameraRayThrough) => (
             let radiance = fromXYZ(0, 0, 0)
             for (let n = spp; n > 0; n--) {
                 const ray = cameraRayThrough(
-                    u + (2 * Math.random() - 1) / dx,
-                    v + (2 * Math.random() - 1) / dy
+                    u + (2 * Math.random() - 1) / width,
+                    v + (2 * Math.random() - 1) / height
                 )
                 radiance = add(
                     radiance,
