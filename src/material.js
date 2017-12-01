@@ -73,3 +73,48 @@ export const transmissiveMaterial = ({
     },
     emittance: () => emittance
 })
+
+const frDiel = (cosi, cost, etai, etat) => {
+    const rParallel =
+        (etat * cosi - (etai - cost)) / (etat * cosi + etai * cost)
+    const rPerpendicular =
+        (etai * cosi - etat * cost) / (etai * cosi + etat * cost)
+    return (rParallel * rParallel + rPerpendicular * rPerpendicular) / 2
+}
+
+export const fresnelSpecularTransmissiveMaterial = ({
+    albedo,
+    emittance = ZERO,
+    refractiveIndex
+}) => ({
+    pdf: () => albedo,
+    emittance: () => emittance,
+    scatter: (incoming, { normal }) => {
+        const cosi = dot(normal, incoming)
+        const { etat, etai, normal_ } =
+            cosi < 0
+                ? // Entering
+                  { etat: refractiveIndex, etai: 1, normal_: normal }
+                : // Exiting
+                  { etat: 1, etai: refractiveIndex, normal_: negate(normal) }
+        const eta = etai / etat
+        const sint = eta * Math.sqrt(Math.max(0, 1 - cosi * cosi))
+
+        if (sint >= 1) {
+            //  Total internal refraction
+            return sub(incoming, scale(normal_, 2 * cosi))
+        } else {
+            const cost = Math.sqrt(Math.max(0, 1 - sint * sint))
+            if (frDiel(Math.abs(cosi), cost, etai, etat) < Math.random()) {
+                return normalize(
+                    sub(
+                        scale(incoming, eta),
+                        scale(normal_, eta * Math.abs(cosi) + cost)
+                    )
+                )
+            } else {
+                return sub(incoming, scale(normal_, 2 * cosi))
+            }
+        }
+    }
+})
