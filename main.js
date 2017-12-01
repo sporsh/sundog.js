@@ -1,5 +1,5 @@
 const canvas = document.createElement('canvas')
-canvas.width = canvas.height = 512
+canvas.width = canvas.height = 256
 document.body.appendChild(canvas)
 
 const ctx = canvas.getContext('2d')
@@ -17,7 +17,7 @@ const updateImage = ({ imageData, x0, y0 }) => {
 }
 const workers = Array.from({ length: numWorkers }, () => createWorker())
 
-const blockSize = 64
+const blockSize = 8
 const rows = imageData.width / blockSize
 const columns = imageData.height / blockSize
 
@@ -27,7 +27,7 @@ for (let row = 0; row < rows; row++) {
         const x0 = column * blockSize
         const y0 = row * blockSize
         messages.push({
-            spp: 50,
+            spp: 1000,
             x0,
             y0,
             x1: x0 + blockSize,

@@ -8,14 +8,15 @@ import { intersectGroupRay } from './src/group.js'
 import {
     lambertianMaterial,
     specularMaterial,
-    transmissiveMaterial
+    transmissiveMaterial,
+    fresnelSpecularTransmissiveMaterial
 } from './src/material.js'
 
 import { rayThrough } from './src/camera.js'
 
 const material = {
     light: lambertianMaterial({
-        albedo: fromXYZ(1, 1, 1),
+        albedo: fromXYZ(0.9, 0.9, 0.9),
         emittance: fromXYZ(10, 10, 10)
     }),
     dimLight: lambertianMaterial({
@@ -23,11 +24,11 @@ const material = {
         emittance: fromXYZ(0.6, 0.8, 1)
     }),
     mirror: specularMaterial({
-        albedo: fromXYZ(1, 1, 1)
+        albedo: fromXYZ(0.9, 0.9, 0.9)
     }),
-    glass: transmissiveMaterial({
-        albedo: fromXYZ(1, 1, 1),
-        refractiveIndex: 1.6
+    glass: fresnelSpecularTransmissiveMaterial({
+        albedo: fromXYZ(0.9, 0.9, 0.9),
+        refractiveIndex: 1.62
     }),
     white: lambertianMaterial({
         albedo: fromXYZ(0.8, 0.8, 0.8)
@@ -49,14 +50,14 @@ export const intersectRay = intersectGroupRay([
     }),
     intersectSphereRay({
         center: fromXYZ(0, 0, 0),
-        radius: 5,
+        radius: 4.1,
         material: material.dimLight
     }),
     // OBJECTS
     intersectSphereRay({
-        center: fromXYZ(-0.5, -0.5, 0.5),
-        radius: 0.5,
-        material: material.white
+        center: fromXYZ(-0.5, -0.6, 0.5),
+        radius: 0.4,
+        material: material.mirror
     }),
     // intersectPlaneRay({
     //     d: -0.5,
@@ -64,16 +65,9 @@ export const intersectRay = intersectGroupRay([
     //     material: material.glass
     // }),
     intersectSphereRay({
-        // center: fromXYZ(0.5, -0.5, 0),
-        center: fromXYZ(0, -0.5, -0.5),
+        center: fromXYZ(0.5, -0.6, -0.5),
         radius: 0.4,
         material: material.glass
-    }),
-    intersectSphereRay({
-        // center: fromXYZ(0.5, -0.5, 0),
-        center: fromXYZ(0.5, -0.5, 0.5),
-        radius: 0.5,
-        material: material.mirror
     }),
     // WALLS
     intersectPlaneRay({
