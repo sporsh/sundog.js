@@ -75,8 +75,7 @@ export const transmissiveMaterial = ({
 })
 
 const frDiel = (cosi, cost, etai, etat) => {
-    const rParallel =
-        (etat * cosi - (etai - cost)) / (etat * cosi + etai * cost)
+    const rParallel = (etat * cosi - etai * cost) / (etat * cosi + etai * cost)
     const rPerpendicular =
         (etai * cosi - etat * cost) / (etai * cosi + etat * cost)
     return (rParallel * rParallel + rPerpendicular * rPerpendicular) / 2
