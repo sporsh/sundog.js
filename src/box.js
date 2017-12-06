@@ -27,3 +27,12 @@ export const testBoxRay = ({ min, max }) => ({
         tMax
     }
 }
+
+export const boundIntersectRay = (testRay, intersectRay) => ray => {
+    const boundRay = testRay(ray)
+    if (boundRay) {
+        return intersectRay(boundRay)
+    }
+    if (testRay(ray) !== false) {
+    }
+}
