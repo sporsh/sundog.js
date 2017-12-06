@@ -7,6 +7,7 @@ export const intersectTriangleRay = triangle => {
     const ab = sub(b, a)
     const ac = sub(c, a)
     const normal = cross(ab, ac)
+    const basis = arbitraryBasisForNormal(normal)
 
     return ({ origin, direction, tMin = 0, tMax = Infinity }) => {
         const qp = negate(direction)
@@ -40,7 +41,7 @@ export const intersectTriangleRay = triangle => {
         return {
             t,
             point: add(origin, scale(direction, t)),
-            basis: arbitraryBasisForNormal(normal),
+            basis: basis,
             intersectable: triangle
         }
     }
