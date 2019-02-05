@@ -35,6 +35,10 @@ const material = {
         albedo: fromXYZ(0.9, 0.9, 0.9),
         refractiveIndex: 1.62
     }),
+    // glass: transmissiveMaterial({
+    //     albedo: fromXYZ(0.9, 0.9, 0.9),
+    //     refractiveIndex: 1.6
+    // }),
     white: lambertianMaterial({
         albedo: fromXYZ(0.8, 0.8, 0.8)
     }),
@@ -71,13 +75,41 @@ export const intersectRay = boundIntersectRay(
         //
         // LIGHT SURCES
         //
-        intersectSphereRay({
-            center: fromXYZ(0, 1, 0),
-            radius: 0.25,
-            material: material.light
-        }),
+            intersectQuadRay(
+                fromXYZ(-0.4, 1, -0.4),
+                fromXYZ(0.4, 1, -0.4),
+                fromXYZ(0.4, 1, 0.4),
+                fromXYZ(-0.4, 1, 0.4),
+                material.light
+        ),
+        // boundIntersectRay(
+        //     testBoxRay({
+        //         min: fromXYZ(-0.2, 1.0001, -0.2),
+        //         max: fromXYZ(0.2, 0.9999, 0.2)
+        //     }),
+        //     intersectQuadRay(
+        //         fromXYZ(-0.4, 1, -0.4),
+        //         fromXYZ(0.4, 1, -0.4),
+        //         fromXYZ(0.4, 1, 0.4),
+        //         fromXYZ(-0.4, 1, 0.4),
+        //         material.light
+        //     )
+        // ),
+        // intersectSphereRay({
+        //     center: fromXYZ(0, 1, 0),
+        //     radius: 0.25,
+        //     material: material.light
+        // }),
         //
         // OBJECTS
+        //
+        // intersectTriangleRay({
+        //     a: fromXYZ(-1, -0.5, 0),
+        //     b: fromXYZ(0, 0.5, 1),
+        //     c: fromXYZ(1, -0.5, 0),
+        //     material: material.white
+        // }),
+
         //
         // CORNELL BOX
         //
@@ -85,6 +117,7 @@ export const intersectRay = boundIntersectRay(
         intersectPlaneRay({
             d: -1,
             basis: arbitraryBasisForNormal(fromXYZ(0, -1, 0)),
+            // material: material.dimLight
             material: material.white
         }),
 
@@ -134,6 +167,18 @@ export const intersectRay = boundIntersectRay(
                 })
             ])
         )
+        // FLOOR WATER
+        // intersectPlaneRay({
+        //     d: -0.8,
+        //     basis: arbitraryBasisForNormal(fromXYZ(0, 1, 0)),
+        //     material: material.glass
+        // })
+        // // FRONT WALL
+        // intersectPlaneRay({
+        //     d: -1,
+        //     basis: arbitraryBasisForNormal(fromXYZ(0, 0, 1)),
+        //     material: material.black
+        // })
     ])
 )
 
@@ -144,7 +189,7 @@ const camera = {
         bitangent: fromXYZ(0, -1, 0),
         normal: fromXYZ(0, 0, 1)
     },
-    aperture: 0,
+    aperture: 0.3,
     fieldOfView: 0.35,
     focalLength: 5
 }

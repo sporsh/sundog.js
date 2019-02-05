@@ -32,6 +32,7 @@ export const lambertianMaterial = ({ albedo, emittance = ZERO }) => ({
     emittance: () => emittance
 })
 
+// Specular reflection
 export const specularMaterial = ({ albedo, emittance = ZERO }) => ({
     pdf: () => albedo,
     scatter: (incoming, { normal }) =>
@@ -39,6 +40,7 @@ export const specularMaterial = ({ albedo, emittance = ZERO }) => ({
     emittance: () => emittance
 })
 
+// Specular transmission
 export const transmissiveMaterial = ({
     albedo,
     emittance = ZERO,
@@ -73,6 +75,27 @@ export const transmissiveMaterial = ({
     },
     emittance: () => emittance
 })
+
+// const fresnel = (incoming, { normal }) => {
+//     const cosi = dot(normal, incoming)
+//     const eta =
+//         cosi < 0
+//             ? // Entering
+//               1 / refractiveIndex
+//             : // Exiting
+//               refractiveIndex / 1
+//     const sint = eta * Math.sqrt(Math.max(0, 1 - cosi * cosi))
+//     if (sint > 1) {
+//         // Total internal reflection
+//         return 1
+//     } else {
+//     }
+//     const cost = Math.sqrt(Math.max(0, 1 - sint * sint))
+//     // const cost2 = 1 - eta * eta * (1- cosi * cosi)
+//     // const cost = Math.sqrt(cost2)
+//
+//     return frDiel(Math.abs(cosi), cost, ei, et)
+// }
 
 const frDiel = (cosi, cost, etai, etat) => {
     const rParallel = (etat * cosi - etai * cost) / (etat * cosi + etai * cost)
@@ -117,3 +140,7 @@ export const fresnelSpecularTransmissiveMaterial = ({
         }
     }
 })
+
+// export const fresnelDielectric = ({ior, material}) => ({
+//
+// })

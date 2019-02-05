@@ -4,25 +4,25 @@ A physically based path tracer written in JavaScript
 
 ## Features
 
-* [x] Geometry
-    * [x] Spheres
-    * [x] Planes
-    * [x] Triangles
-    * [ ] Signed distance fields
-    * [ ] Acceleration structures
-    * [ ] Object instancing
-* [x] Camera
-    * [x] Perspective camera
-    * [ ] Orthographic camera
-    * [x] Depth of Field
-* [x] Monte Carlo integration
-* [x] Distributed rendering
-* [x] Progressive rendering
-* [ ] Spectral rendering
-* [ ] Motion blur
-* [x] Importance sampling
-    * [x] Lambert
-    * [x] Specular reflection
-    * [x] Specular transmission
-    * [x] Fresnel dielectric
-    * [ ] Fresnel conductive
+-   [x] Geometry
+    -   [x] Spheres
+    -   [x] Planes
+    -   [x] Triangles
+    -   [ ] Signed distance fields
+    -   [ ] Acceleration structures
+    -   [ ] Object instancing
+-   [x] Camera
+    -   [x] Perspective camera
+    -   [ ] Orthographic camera
+    -   [x] Depth of Field
+-   [x] Monte Carlo integration
+-   [x] Distributed rendering
+-   [x] Progressive rendering
+-   [ ] Spectral rendering
+-   [ ] Motion blur
+-   [x] Importance sampling
+    -   [x] Lambert
+    -   [x] Specular reflection
+    -   [x] Specular transmission
+    -   [x] Fresnel dielectric
+    -   [ ] Fresnel conductive
