@@ -26,7 +26,7 @@ export const renderRegion = (trace, cameraRayThrough) => (
           v + (2 * Math.random() - 1) / height
         )
         let radiance = trace(ray, fromXYZ(0, 0, 0), fromXYZ(1, 1, 1), 0)
-        const color = fromV3(scale(radiance, 1 / spp))
+        // const color = fromV3(scale(radiance, 1 / spp))
         const i = (x - x0) * 3 + (y - y0) * dx * 3
         buffer[i] += radiance.x
         buffer[i + 1] += radiance.y
