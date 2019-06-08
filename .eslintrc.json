@@ -1,0 +1,21 @@
+{
+  "plugins": ["prettier", "array-func"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:array-func/recommended",
+    "plugin:eslint-comments/recommended"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "eslint-comments/no-unused-disable": "error"
+  },
+  "parserOptions": {
+    "ecmaVersion": 10,
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "browser": true
+  }
+}
