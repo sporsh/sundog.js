@@ -20,7 +20,7 @@ const config = {
 }
 
 const createWorker = () => {
-  const worker = new Worker('worker.js', { type: 'module' })
+  const worker = new Worker('./worker.js', { type: 'module' })
   worker.addEventListener('message', ({ data }) => updateImage(data))
   return worker
 }
