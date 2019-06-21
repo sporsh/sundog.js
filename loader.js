@@ -32,6 +32,12 @@ const reviver = (key, value) => {
       return intersectSphereRay(value)
     case 'lambertian':
       return lambertianMaterial(value)
+    case 'specular':
+      return specularMaterial(value)
+    case 'fresnelSpecularTransmissive':
+      return fresnelSpecularTransmissiveMaterial(value)
+    case 'transmissive':
+      return transmissiveMaterial(value)
     case 'material':
       return Object.values(value)[0]
     case 'geometry':
