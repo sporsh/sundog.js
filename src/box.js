@@ -1,8 +1,8 @@
 export const testBoxRay = ({ min, max }) => ({
   origin,
   direction,
-  tMin = 0,
-  tMax = Infinity
+  tMin,
+  tMax
 }) => {
   // X-slab
   {

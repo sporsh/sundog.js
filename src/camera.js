@@ -1,12 +1,16 @@
 import { add, normalize, sub } from './vector3.js'
 import { fromStandardBasis } from './basis.js'
 
+const EPSILON = 0.00001
+
 export const rayThrough = ({
   position,
   basis,
   aperture,
   fieldOfView,
-  focalLength
+  focalLength,
+  tMin = EPSILON,
+  tMax = Infinity
 }) => (u, v) => {
   const origin = randomOriginWithinAperture({ position, aperture })
   const target = add(
@@ -18,7 +22,7 @@ export const rayThrough = ({
     })
   )
   const direction = normalize(sub(target, origin))
-  return { origin, direction, tMin: 0, tMax: Infinity }
+  return { origin, direction, tMin, tMax }
 }
 
 const randomOriginWithinAperture = ({ position, aperture }) => {

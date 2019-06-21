@@ -33,8 +33,8 @@ export const tracer = (intersect, maxDepth = 8, epsilon = 0.0001) => {
       const newRay = {
         origin: point,
         direction: scatter(ray.direction, basis),
-        tMin: epsilon,
-        tMax: Infinity
+        tMin: ray.tMin,
+        tMax: ray.tMax
       }
       const newWeight = hadamard(weight, scale(prob, 1 / pMax))
       return trace(newRay, newRadiance, newWeight, depth + 1)
