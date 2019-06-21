@@ -1,12 +1,19 @@
 import { renderRegion } from './src/render.js'
 import { tracer } from './src/trace.js'
-import { intersectRay, cameraRayThrough } from './scene.js'
+import { load } from './loader.js'
 
-const tracer_ = tracer(intersectRay)
-const renderRegion_ = renderRegion(tracer_, cameraRayThrough)
+let renderRegion_ = () => {}
 
 onmessage = ({ data: msg }) => {
   switch (msg.type) {
+    case 'loadScene':
+      {
+        const { camera: cameraRayThrough, geometry: intersectRay } = load(
+          msg.data
+        )
+        renderRegion_ = renderRegion(tracer(intersectRay), cameraRayThrough)
+      }
+      break
     case 'renderRegion':
       {
         const { spp, x0, y0, x1, y1, width, height } = msg.data

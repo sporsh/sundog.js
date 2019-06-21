@@ -1,4 +1,5 @@
 import * as dat from 'dat.gui'
+import scene from './scene.js'
 
 const init = config => ({
   config,
@@ -12,10 +13,21 @@ const updateCanvas = state => canvas => {
   state.imageData = state.ctx.getImageData(0, 0, canvas.width, canvas.height)
   state.sampleData = new Float64Array(canvas.width * canvas.height * 3)
 
+  clearCanvas(state)
+}
+
+const clearCanvas = state => {
   // Fill alpha channel
   const imageData32 = new Uint32Array(state.imageData.data.buffer)
   imageData32.fill(0xff000000)
   state.ctx.putImageData(state.imageData, 0, 0)
+}
+
+const clearSamples = state => {
+  state.sampleData.fill(0)
+  state.numSamples = 0
+
+  clearCanvas(state)
 }
 
 const updateWorkers = state => {
@@ -89,7 +101,8 @@ document.body.appendChild(canvas)
 const config = {
   numWorkers: navigator.hardwareConcurrency,
   spp: 2,
-  autoUpdate: true
+  autoUpdate: true,
+  scene
 }
 
 const state = init(config)
@@ -103,6 +116,13 @@ const start = state => {
   updateWorkers(state)
 
   state.workers.forEach(worker => {
+    state.workers.forEach(worker =>
+      worker.postMessage({
+        type: 'loadScene',
+        data: JSON.stringify(state.config.scene)
+      })
+    )
+
     worker.postMessage({
       type: 'renderRegion',
       data: {
@@ -130,23 +150,35 @@ const stop = state => {
 
 const controls = {
   start: () => start(state),
-  stop: () => stop(state)
+  stop: () => stop(state),
+  clear: () => clearSamples(state)
 }
 
 window.addEventListener('load', () => {
   var gui = new dat.GUI()
-  gui.add(state.config, 'numWorkers', 1, navigator.hardwareConcurrency, 1)
-  gui.add(state.config, 'spp', 1, 10, 1)
-  gui.add(state.config, 'autoUpdate', 1, 10, 1)
+
+  const rendererGui = gui.addFolder('Renderer')
+
+  rendererGui.add(
+    state.config,
+    'numWorkers',
+    1,
+    navigator.hardwareConcurrency,
+    1
+  )
+  rendererGui.add(state.config, 'spp', 1, 10, 1)
+  rendererGui.add(state.config, 'autoUpdate', 1, 10, 1)
+  rendererGui.open()
+
+  const cameraGui = gui.addFolder('Camera')
+  cameraGui.add(state.config.scene.camera, 'aperture')
+  cameraGui.add(state.config.scene.camera, 'fieldOfView')
+  cameraGui.add(state.config.scene.camera, 'focalLength')
+  cameraGui.add(state.config.scene.camera, 'tMin')
+  cameraGui.add(state.config.scene.camera, 'tMax')
+  cameraGui.open()
+
   gui.add(controls, 'start')
   gui.add(controls, 'stop')
-  // gui.add(text, 'speed', -5, 5)
-  // gui.add(text, 'displayOutline')
-  // gui.add(text, 'explode')
-
-  // const startButton = document.createElement('input')
-  // startButton.value = 'START'
-  // startButton.type = 'button'
-  // startButton.addEventListener('click', start)
-  // document.body.appendChild(startButton)
+  gui.add(controls, 'clear')
 })
