@@ -50,7 +50,7 @@ const reviver = (key, value) => {
       return boundIntersectRay(test, intersect)
     }
     case 'plane':
-      return plane.intersectPlaneRay({
+      return plane.intersectDirectedPlaneRay({
         ...value,
         basis: basis.arbitraryBasisForNormal(value.normal)
       })

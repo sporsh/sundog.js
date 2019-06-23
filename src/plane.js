@@ -19,3 +19,12 @@ export const intersectPlaneRay = plane => ({
     }
   }
 }
+
+export const intersectDirectedPlaneRay = plane => {
+  const intersect = intersectPlaneRay(plane)
+  return ray => {
+    if (dot(plane.basis.normal, ray.direction) < 0) {
+      return intersect(ray)
+    }
+  }
+}
