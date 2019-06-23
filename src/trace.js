@@ -1,13 +1,13 @@
 import { add, hadamard, scale } from './vector3.js'
 
-export const tracer = (intersect, maxDepth = 8, epsilon = 0.0001) => {
+const RUSSIAN_ROULETTE_THRESHOLD = 2
+
+export const tracer = (intersect, maxDepth = 8) => {
   const trace = (ray, radiance, weight, depth) => {
     const intersection = intersect(ray)
     if (intersection) {
       const {
-        t,
         point,
-        normal,
         basis,
         intersectable: {
           material: { pdf, emittance, scatter }
@@ -25,7 +25,7 @@ export const tracer = (intersect, maxDepth = 8, epsilon = 0.0001) => {
       if (
         (pMax >= 1 && depth > maxDepth) ||
         pMax <= 0 ||
-        (depth > 2 && Math.random() > pMax)
+        (depth > RUSSIAN_ROULETTE_THRESHOLD && Math.random() > pMax)
       ) {
         return newRadiance
       }

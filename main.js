@@ -45,11 +45,13 @@ const createWorker = state => {
 
 const updateSampleData = state => ({
   target: worker,
-  data: { samples, spp, x0, y0 }
+  data: { samples, spp, x0, y0, x1, y1, width, height }
 }) => {
   state.numSamples += spp
   for (let i = 0; i < samples.length; i++) {
-    state.sampleData[i] += samples[i]
+    const y = y0 + Math.floor(i / (x1 * 3 - x0 * 3))
+    const x = x0 * 3 + (i % (x1 * 3 - x0 * 3))
+    state.sampleData[x + y * width * 3] += samples[i]
   }
 
   if (state.config.autoUpdate) {
@@ -61,18 +63,20 @@ const updateSampleData = state => ({
       type: 'renderRegion',
       data: {
         spp: state.config.spp,
-        x0: x0,
-        y0: y0,
-        x1: state.imageData.width,
-        y1: state.imageData.height,
-        width: state.imageData.width,
-        height: state.imageData.height
+        x0: state.config.region.x0,
+        y0: state.config.region.y0,
+        x1: state.config.region.x1,
+        y1: state.config.region.y1,
+        width,
+        height
       }
     })
   }
 }
 
-const updateImage = ({ ctx, imageData, sampleData, numSamples }) => {
+const updateImage = state => {
+  const { ctx, imageData, sampleData, numSamples } = state
+
   // Create typed view into imageData
   const imageData8 = new Uint8ClampedArray(imageData.data.buffer)
 
@@ -84,10 +88,26 @@ const updateImage = ({ ctx, imageData, sampleData, numSamples }) => {
   }
   ctx.putImageData(imageData, 0, 0)
 
-  // Render stats
+  if (state.config.renderStats) {
+    renderStats(state)
+    renderRegion(state)
+  }
+}
+
+const renderStats = ({ ctx, numSamples }) => {
   ctx.fillStyle = 'white'
   ctx.font = '10px sans-serif'
   ctx.fillText(`SPP: ${numSamples}`, 10, 10)
+}
+
+const renderRegion = ({ ctx, config: { region } }) => {
+  ctx.strokeStyle = 'green'
+  ctx.strokeRect(
+    region.x0,
+    region.y0,
+    region.x1 - region.x0,
+    region.y1 - region.y0
+  )
 }
 
 //
@@ -100,8 +120,17 @@ document.body.appendChild(canvas)
 
 const config = {
   numWorkers: navigator.hardwareConcurrency,
-  spp: 2,
+  spp: 1,
   autoUpdate: true,
+  renderStats: true,
+  region: {
+    x0: 0,
+    y0: 0,
+    x1: canvas.width,
+    y1: canvas.height,
+    width: canvas.width,
+    height: canvas.height
+  },
   scene
 }
 
@@ -126,13 +155,8 @@ const start = state => {
     worker.postMessage({
       type: 'renderRegion',
       data: {
-        spp: state.config.spp,
-        x0: 0,
-        y0: 0,
-        x1: state.imageData.width,
-        y1: state.imageData.height,
-        width: state.imageData.width,
-        height: state.imageData.height
+        ...state.config.region,
+        spp: state.config.spp
       }
     })
   })
@@ -167,15 +191,22 @@ window.addEventListener('load', () => {
     1
   )
   rendererGui.add(state.config, 'spp', 1, 10, 1)
-  rendererGui.add(state.config, 'autoUpdate', 1, 10, 1)
+  rendererGui.add(state.config, 'autoUpdate')
+  rendererGui.add(state.config, 'renderStats')
+  rendererGui.add(state.config.scene, 'maxDepth')
   rendererGui.open()
+
+  const regionGui = gui.addFolder('Render region')
+  regionGui.add(state.config.region, 'x0')
+  regionGui.add(state.config.region, 'y0')
+  regionGui.add(state.config.region, 'x1')
+  regionGui.add(state.config.region, 'y1')
+  regionGui.open()
 
   const cameraGui = gui.addFolder('Camera')
   cameraGui.add(state.config.scene.camera, 'aperture')
   cameraGui.add(state.config.scene.camera, 'fieldOfView')
   cameraGui.add(state.config.scene.camera, 'focalLength')
-  cameraGui.add(state.config.scene.camera, 'tMin')
-  cameraGui.add(state.config.scene.camera, 'tMax')
   cameraGui.open()
 
   gui.add(controls, 'start')
