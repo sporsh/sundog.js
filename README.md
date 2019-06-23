@@ -1,6 +1,6 @@
 A physically based path tracer written in JavaScript
 
-![Example 5120spp](https://user-images.githubusercontent.com/1416154/41510920-6982b7f6-726d-11e8-8aa1-afe98fa8bd9f.png)
+![Example ~20k spp](https://user-images.githubusercontent.com/1416154/59981015-3da58400-95fe-11e9-8595-039a84a39b0e.png)
 
 ## Features
 
