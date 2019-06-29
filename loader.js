@@ -10,6 +10,7 @@ import {
 import { intersectGroupRay } from './src/group.js'
 import * as basis from './src/basis.js'
 import * as plane from './src/plane.js'
+import * as triangle from './src/triangle.js'
 import { boundIntersectRay, testBoxRay } from './src/box.js'
 
 export const load = json => {
@@ -27,6 +28,9 @@ const reviver = (key, value) => {
     case 'center':
     case 'albedo':
     case 'emittance':
+    case 'a':
+    case 'b':
+    case 'c':
       return v3.fromXYZ(...value)
     case 'sphere':
       return intersectSphereRay(value)
@@ -54,6 +58,8 @@ const reviver = (key, value) => {
         ...value,
         basis: basis.arbitraryBasisForNormal(value.normal)
       })
+    case 'triangle':
+      return triangle.intersectTriangleRay(value)
     default:
       return value
   }
