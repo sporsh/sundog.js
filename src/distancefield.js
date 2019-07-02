@@ -2,6 +2,68 @@ import * as v3 from './vector3'
 import { arbitraryBasisForNormal } from './basis'
 
 const EPSILON = 0.001
+let doLog = true
+
+const intersect = intersectable => distanceFunction => ray => {
+  const epsilon = 0.0001
+  let t = distanceFunction(ray.origin)
+  let prevD = 0
+  let omega = 1.6
+
+  // Check if we start outside or inside
+  const sign = t < 0 ? -1 : 1
+
+  // // Check how far the furthest ray distance is from the surface, and subtract that from the max
+  let tMax = Math.min(10, ray.tMax)
+  tMax =
+    tMax -
+    sign * distanceFunction(v3.add(ray.origin, v3.scale(ray.direction, tMax)))
+
+  // if (doLog) {
+  //   console.log(`t: ${t}, tMax: ${tMax}`)
+  //   doLog = false
+  // }
+
+  let n = 0
+  const nMax = 10000
+  while (t < tMax && n < nMax) {
+    const point = v3.add(ray.origin, v3.scale(ray.direction, t))
+    const d = distanceFunction(point)
+    const dt = d * sign * omega
+
+    if (dt < 0) {
+      // Went through surface, stepping back
+      // We have a hit between here and previous somewhere... (bisect?)
+      // t += 1.6 * dt
+      if (doLog) {
+        console.log(`dt: ${dt}, prevD: ${prevD}, t: ${t}, tMax: ${tMax}`)
+        doLog = false
+      }
+
+      t -= prevD
+      omega /= 2
+      // } else if (dt < epsilon && t > epsilon) {
+    } else if (dt < epsilon && n > 1 && t > epsilon) {
+      // if (dt < epsilon && t > epsilon * 1.2) {
+      // Close enough to consider it a hit
+      const normal = normalAtPoint(distanceFunction, point, epsilon)
+      const offsetPoint = v3.add(point, v3.scale(normal, -dt))
+      // const offsetPoint = point
+      return {
+        t,
+        point: offsetPoint,
+        basis: arbitraryBasisForNormal(normal),
+        // basis: arbitraryBasisForNormal(directedNormal),
+        intersectable: intersectable
+      }
+    } else {
+      // No hit, continuing to next iteration
+      prevD = dt
+      t += dt
+    }
+    n++
+  }
+}
 
 const intersect_ = intersectable => distanceFunction => ray => {
   const epsilon = Math.min(EPSILON, ray.tMin)
@@ -39,9 +101,10 @@ const intersect_ = intersectable => distanceFunction => ray => {
   }
 }
 
-const intersect = intersectable => distanceFunction => ray => {
+const intersect_good = intersectable => distanceFunction => ray => {
   const epsilon = 0.001
-  let t = 0.5 // Prevent sef-intersection
+  let t = 0.0005 // Prevent sef-intersection
+  // let t = epsilon * 10 // Prevent sef-intersection
   let tMax = Math.min(ray.tMax, 10)
   while (t < tMax) {
     const point = v3.add(ray.origin, v3.scale(ray.direction, t))
@@ -49,31 +112,96 @@ const intersect = intersectable => distanceFunction => ray => {
     const distance = distanceFunction(point)
 
     if (
-      // t > ray.tMin &&
-      // t < ray.tMax &&
-      distance < epsilon
-      // distance < epsilon &&
-      // distance > -epsilon
+      t > ray.tMin &&
+      t < ray.tMax &&
+      // distance < epsilon
+      distance < epsilon &&
+      distance > -epsilon
       // distance > 0
       // distance < epsilon / 2
     ) {
+      const normal = normalAtPoint(distanceFunction, point, epsilon)
       return {
         t,
-        point,
+        // point,
+        point: v3.add(point, v3.scale(normal, -2 * distance)),
         basis: arbitraryBasisForNormal(
           // normalAtPoint(distanceFunction, point, 0.01)
-          normalAtPoint(distanceFunction, point, epsilon)
+          // normalAtPoint(distanceFunction, point, epsilon)
+          normal
         ),
         intersectable: intersectable
       }
     }
     // t += Math.abs(distance)
-    // t += Math.max(distance, epsilon)
-    t += distance
-    if (t < ray.tMin && t > ray.tMax) {
-      return
-    }
+    t += Math.max(distance, epsilon)
     // t += distance
+
+    // if (t < ray.tMin && t > ray.tMax) {
+    //   return
+    // }
+  }
+}
+
+const intersect__ = intersectable => distanceFunction => ray => {
+  // http://erleuchtet.org/~cupe/permanent/enhanced_sphere_tracing.pdf
+  const forceHit = true
+
+  const tMin = Math.max(ray.tMin, 0.005)
+  const tMax = Math.min(ray.tMax, 10)
+  // let omega = 1.6
+  // let omega = 1.2
+  let omega = 1
+
+  let previousRadius = 0
+  let stepLength = 0
+  // let stepLength = distanceFunction(ray.origin)
+  // let functionSign = stepLength < 0 ? -1 : 1
+  // let t = stepLength * functionSign
+  let functionSign = distanceFunction(ray.origin) < 0 ? -1 : 1
+  let t = tMin
+
+  while (t < tMax) {
+    const point = v3.add(ray.origin, v3.scale(ray.direction, t))
+    const signedRadius = functionSign * distanceFunction(point)
+    const radius = Math.abs(signedRadius)
+
+    const sorFail = omega > 1 && radius + previousRadius < stepLength
+    if (sorFail) {
+      stepLength -= omega * stepLength
+      omega = 1
+    } else {
+      stepLength = signedRadius * omega
+
+      // if (t > ray.tMin && radius < previousRadius && radius < tMin) {
+      if (t > ray.tMin && radius < tMin) {
+        // if (t > tMin && radius < tMin && signedRadius > -tMin) {
+        // const normal = v3.negate(normalAtPoint(distanceFunction, point, 0.01))
+        const normal = normalAtPoint(distanceFunction, point, 0.01)
+        return {
+          t,
+          point: v3.add(point, v3.scale(normal, -2 * radius)),
+          basis: arbitraryBasisForNormal(
+            normal
+            // normalAtPoint(distanceFunction, point, 0.01)
+            // normalAtPoint(distanceFunction, point, 0.01)
+            // v3.scale(normalAtPoint(distanceFunction, point, tMin), -1)
+          ),
+          intersectable: intersectable
+        }
+      }
+    }
+
+    previousRadius = radius
+    t += stepLength
+
+    if (!sorFail || t > tMax) {
+      break
+    }
+  }
+
+  if (t > tMax && !forceHit) {
+    return
   }
 }
 
