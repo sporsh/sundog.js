@@ -5,10 +5,10 @@ const EPSILON = 0.001
 let doLog = true
 
 const intersect = intersectable => distanceFunction => ray => {
-  const epsilon = 0.0001
+  const epsilon = 0.0005
   let t = distanceFunction(ray.origin)
   let prevD = 0
-  let omega = 1.6
+  let omega = 1.2
 
   // Check if we start outside or inside
   const sign = t < 0 ? -1 : 1
@@ -25,11 +25,27 @@ const intersect = intersectable => distanceFunction => ray => {
   // }
 
   let n = 0
-  const nMax = 10000
+  const nMax = 100
   while (t < tMax && n < nMax) {
     const point = v3.add(ray.origin, v3.scale(ray.direction, t))
     const d = distanceFunction(point)
     const dt = d * sign * omega
+
+    // if (dt < epsilon && dt >= 0 && n > 1 && t > epsilon) {
+    // if (dt < epsilon && dt >= 0 && n > 10) {
+    if (dt < epsilon && dt >= 0 && t > epsilon) {
+      // if (dt < epsilon && t > epsilon * 1.2) {
+      // Close enough to consider it a hit
+      const normal = normalAtPoint(distanceFunction, point, epsilon)
+      return {
+        t,
+        // point,
+        point: v3.add(point, v3.scale(normal, -dt)),
+        basis: arbitraryBasisForNormal(normal),
+        // basis: arbitraryBasisForNormal(directedNormal),
+        intersectable: intersectable
+      }
+    }
 
     if (dt < 0) {
       // Went through surface, stepping back
@@ -40,22 +56,14 @@ const intersect = intersectable => distanceFunction => ray => {
         doLog = false
       }
 
+      // const newT = t - prevD
+      // prevD = (t - newT) / 2
+      // t = newT
+
       t -= prevD
+
       omega /= 2
       // } else if (dt < epsilon && t > epsilon) {
-    } else if (dt < epsilon && n > 1 && t > epsilon) {
-      // if (dt < epsilon && t > epsilon * 1.2) {
-      // Close enough to consider it a hit
-      const normal = normalAtPoint(distanceFunction, point, epsilon)
-      const offsetPoint = v3.add(point, v3.scale(normal, -dt))
-      // const offsetPoint = point
-      return {
-        t,
-        point: offsetPoint,
-        basis: arbitraryBasisForNormal(normal),
-        // basis: arbitraryBasisForNormal(directedNormal),
-        intersectable: intersectable
-      }
     } else {
       // No hit, continuing to next iteration
       prevD = dt
