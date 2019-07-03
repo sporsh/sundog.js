@@ -5,10 +5,130 @@ const EPSILON = 0.001
 let doLog = true
 
 const intersect = intersectable => distanceFunction => ray => {
+  // TODO: Triangulate where ray intersects with tangent(point - (normal * d))
+
+  // const epsilon = 0.0001
+  const epsilon = ray.tMin
+  let omega = 1
+
+  let t = 0
+  let tMax = Math.min(10000, ray.tMax)
+  let d = 0
+  let dt = 0
+  let prevD = 0
+  let sign = 0
+
+  // Special case where t0 == 0
+  // Ensure we have momentum to get out of a perfect intersection
+  while (t < epsilon) {
+    if (dt == 0) {
+      t += epsilon
+    }
+    const point = v3.add(ray.origin, v3.scale(ray.direction, t))
+    d = distanceFunction(point)
+    if (sign == 0) {
+      sign = dt < 0 ? -1 : 1
+    }
+    dt = d * sign
+
+    if (dt < 0) {
+      // Surface is thinner than epsilon, return early
+      return
+      // t -= prevD
+      // const point = v3.add(ray.origin, v3.scale(ray.direction, t))
+      // const normal = normalAtPoint(distanceFunction, point, epsilon)
+      // return {
+      //   t,
+      //   point: v3.add(point, v3.scale(normal, -dt)),
+      //   basis: arbitraryBasisForNormal(normal),
+      //   intersectable: intersectable
+      // }
+    }
+
+    prevD = dt
+    t += dt
+  }
+
+  // // Starting off too close to surface, will skip until we reach min dist
+  // // Check how far the furthest ray distance is from the surface, and subtract that from the max
+  // let tMax = 1000
+  const tMaxD = distanceFunction(
+    v3.add(ray.origin, v3.scale(ray.direction, tMax))
+  )
+  tMax -= sign * tMaxD
+
+  // // Skip ahead until t >= epsilon
+  // while (t < epsilon) {
+  //   const point = v3.add(ray.origin, v3.scale(ray.direction, t))
+  //   dt = distanceFunction(point) * sign
+  //   t += dt
+  //   if (t > tMax || dt < prevD || dt < 0) {
+  //     const normal = normalAtPoint(distanceFunction, ray.origin, epsilon)
+  //     return {
+  //       t0,
+  //       point: ray.origin,
+  //       // normal: normalAtPoint(distanceFunction, ray.origin, epsilon),
+  //       basis: arbitraryBasisForNormal(normal),
+  //       intersectable: intersectable
+  //     }
+  //   }
+  //   prevD = dt
+  // }
+
+  let n = 0
+  const nMax = 100
+  // t = 0
+  while (t < tMax && n < nMax) {
+    const point = v3.add(ray.origin, v3.scale(ray.direction, t))
+    const d = distanceFunction(point)
+    const dt = d * sign
+
+    if (dt < 0) {
+      // debugger
+      // Went through surface, stepping back
+      // We have a hit between here and previous somewhere... (bisect?)
+      // t += 1.6 * dt
+
+      // const newT = t - prevD
+      // prevD = (t - newT) / 2
+      // t = newT
+      prevD = prevD / 2
+      t -= prevD
+
+      omega = 1
+      // } else if (dt < epsilon && t > epsilon) {
+    } else if (dt == 0) {
+      t += epsilon
+    } else if (dt < epsilon && dt < prevD) {
+      // debugger
+      // if (dt < epsilon && t > epsilon * 1.2) {
+      // Close enough to consider it a hit
+      const normal = normalAtPoint(distanceFunction, point, epsilon)
+      return {
+        t,
+        // point,
+        point: v3.add(point, v3.scale(normal, -dt)),
+        basis: arbitraryBasisForNormal(normal),
+        // basis: arbitraryBasisForNormal(directedNormal),
+        intersectable: intersectable
+      }
+    } else {
+      // No hit, continuing to next iteration
+      prevD = dt
+      t += dt * omega
+      // if (t > epsilon) {
+      //   skipUntilFarEnoughFromSurface = false
+      // }
+    }
+    n++
+  }
+}
+
+const intersect_new = intersectable => distanceFunction => ray => {
   const epsilon = 0.0001
   let t = distanceFunction(ray.origin)
   let prevD = 0
-  let omega = 1.2
+  let omega = 1
 
   // Check if we start outside or inside
   const sign = t < 0 ? -1 : 1
@@ -38,7 +158,34 @@ const intersect = intersectable => distanceFunction => ray => {
     // if (dt < epsilon && t > ray.tMin && dt < prevD) {
     // if (dt < epsilon && dt >= 0 && dt < prevD) {
     // if (dt < epsilon && dt < prevD) {
-    if (dt < epsilon && dt < prevD && n > 20) {
+    // if (dt < epsilon && dt < prevD && n > 20) {
+
+    if (dt == 0) {
+      console.log(
+        `NULL: n: ${n}, dt: ${dt}, prevD: ${prevD}, t: ${t}, tMax: ${tMax}`
+      )
+    }
+
+    if (dt < 0) {
+      // Went through surface, stepping back
+      // We have a hit between here and previous somewhere... (bisect?)
+      // t += 1.6 * dt
+      if (doLog) {
+        console.log(
+          `n: ${n}, dt: ${dt}, prevD: ${prevD}, t: ${t}, tMax: ${tMax}`
+        )
+        doLog = false
+      }
+
+      // const newT = t - prevD
+      // prevD = (t - newT) / 2
+      // t = newT
+      prevD = prevD / 2
+      t -= prevD
+
+      omega = 1
+      // } else if (dt < epsilon && t > epsilon) {
+    } else if (dt < epsilon && dt < prevD) {
       // if (dt < epsilon && t > epsilon * 1.2) {
       // Close enough to consider it a hit
       if (doLog) {
@@ -56,27 +203,6 @@ const intersect = intersectable => distanceFunction => ray => {
         // basis: arbitraryBasisForNormal(directedNormal),
         intersectable: intersectable
       }
-    }
-
-    if (dt < 0) {
-      // Went through surface, stepping back
-      // We have a hit between here and previous somewhere... (bisect?)
-      // t += 1.6 * dt
-      if (doLog) {
-        console.log(
-          `n: ${n}, dt: ${dt}, prevD: ${prevD}, t: ${t}, tMax: ${tMax}`
-        )
-        doLog = false
-      }
-
-      // const newT = t - prevD
-      // prevD = (t - newT) / 2
-      // t = newT
-
-      t -= prevD
-
-      omega = 1
-      // } else if (dt < epsilon && t > epsilon) {
     } else {
       // No hit, continuing to next iteration
       prevD = dt
@@ -264,11 +390,15 @@ export const intersectBoxRay = box => {
   }
 
   return intersect(box)(
-    round(radius)(
-      translate(origin)(
-        twist((turns / dimensions.y) * Math.PI)(distanceFunction)
-      )
+    // translate(origin)(distanceFunction)
+    translate(origin)(
+      twist((turns / dimensions.y) * Math.PI)(round(radius)(distanceFunction))
     )
+    // round(radius)(
+    //   translate(origin)(
+    //     twist((turns / dimensions.y) * Math.PI)(distanceFunction)
+    //   )
+    // )
   )
   // return intersect(box)(round(0.1)(translate(origin)(rotate(distanceFunction))))
   // return intersect(box)(distanceFunction)
