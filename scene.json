@@ -1,0 +1,51 @@
+{
+  "camera": {
+    "position": [0, 0, -4],
+    "basis": {
+      "tangent": [1, 0, 0],
+      "bitangent": [0, -1, 0],
+      "normal": [0, 0, 0]
+    },
+    "aperture": 0,
+    "fieldOfView": 0.35,
+    "focalLength": 5
+  },
+  "geometry": {
+    "sphere": {
+      "center": [0, 1, 0],
+      "radius": 0.25,
+      "material": {
+        "lambertian": {
+          "albedo": [0, 0, 0],
+          "emittance": [10, 10, 10]
+        }
+      }
+    }
+  }
+}
+
+
+
+
+{
+  "camera":{},
+  "geometry": {
+    "bound":{
+      "test":{},
+      "intersect":{}
+    }
+  }
+}
+
+
+
+
+{
+  "camera":{},
+  "geometry": {
+    "constructor": "sphere",
+    "":{
+      "aabb":{},
+    }
+  }
+}

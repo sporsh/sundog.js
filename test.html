@@ -101,10 +101,59 @@
         // TODO: Triangulate where ray intersects with tangent(point - (normal * d))
 
         const epsilon = 4
+
         // let origin = ray.origin
-        let t = distanceFunction(ray.origin)
+        const t0 = distanceFunction(ray.origin)
+        let sign = t0 < 0 ? -1 : 1
+        let t = t0 * sign
+
         let prevD = 0
         let omega = 1
+
+        // Special case where t0 == 0
+        if (t == 0) {
+          debugger
+          t += epsilon
+          const point = add(ray.origin, scale(ray.direction, t))
+          t = distanceFunction(point)
+          sign = t < 0 ? -1 : 1
+          t *= sign
+          // if (t > tMax) {
+          //   return {
+          //     t0,
+          //     point: ray.origin,
+          //     normal: normalAtPoint(distanceFunction, ray.origin, epsilon),
+          //     intersectable: intersectable
+          //   }
+          // }
+        }
+
+        // // Check how far the furthest ray distance is from the surface, and subtract that from the max
+        // let tMax = 1000
+        let tMax = Math.min(10000, ray.tMax)
+        const tMaxD = distanceFunction(
+          add(ray.origin, scale(ray.direction, tMax))
+        )
+        tMax -= sign * tMaxD
+
+        // Skip ahead until t >= epsilon
+        while (t < epsilon) {
+          debugger
+          const point = add(
+            ray.origin,
+            scale(ray.direction, t == 0 ? epsilon : t)
+          )
+          dt = distanceFunction(point)
+          t += sign * dt
+          if (t > tMax) {
+            return {
+              t0,
+              point: ray.origin,
+              normal: normalAtPoint(distanceFunction, ray.origin, epsilon),
+              intersectable: intersectable
+            }
+          }
+        }
 
         if (t == 0) {
           debugger
@@ -114,19 +163,11 @@
           t = distanceFunction(add(ray.origin, scale(ray.direction, epsilon)))
         }
 
-        // Starting off too close to surface, will skip until we reach min dist
-        let skipUntilFarEnoughFromSurface = t < epsilon ? true : false
+        // // Starting off too close to surface, will skip until we reach min dist
+        // let skipUntilFarEnoughFromSurface = t < epsilon ? true : false
 
-        // Check if we start outside or inside
-        const sign = t < 0 ? -1 : 1
-
-        // // Check how far the furthest ray distance is from the surface, and subtract that from the max
-        // let tMax = 1000
-        let tMax = Math.min(10000, ray.tMax)
-        const tMaxD = distanceFunction(
-          add(ray.origin, scale(ray.direction, tMax))
-        )
-        tMax -= sign * tMaxD
+        // // Check if we start outside or inside
+        // const sign = t < 0 ? -1 : 1
 
         let n = 0
         const nMax = 100
@@ -156,6 +197,8 @@
 
             omega = 1
             // } else if (dt < epsilon && t > epsilon) {
+          } else if (dt == 0) {
+            t += epsilon
           } else if (dt < epsilon && dt < prevD) {
             // debugger
             // if (dt < epsilon && t > epsilon * 1.2) {
@@ -169,12 +212,13 @@
               // basis: arbitraryBasisForNormal(directedNormal),
               intersectable: intersectable
             }
-          } else if (dt == 0) {
-            t += epsilon
           } else {
             // No hit, continuing to next iteration
             prevD = dt
             t += dt * omega
+            // if (t > epsilon) {
+            //   skipUntilFarEnoughFromSurface = false
+            // }
           }
           n++
         }

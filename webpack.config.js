@@ -15,13 +15,15 @@ module.exports = {
     new HtmlWebpackPlugin({ template: 'index.html' }),
     new WorkerPlugin()
   ],
-  // devtool: "source-map"
+  // devtool: 'source-map',
+  // devtool: 'eval-source-map',
+  // devtool: 'inline-cheap-module-source-map',
+  // devtool: 'inline-source-map',
   optimization: {
     minimize: false
   },
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
-    compress: true,
-    port: 8080
+    port: 8000
   }
 }

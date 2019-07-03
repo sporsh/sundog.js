@@ -29,3 +29,9 @@ export const sub = (a, b) => fromXYZ(a.x - b.x, a.y - b.y, a.z - b.z)
 export const ZERO = fromXYZ(0, 0, 0)
 
 export const hadamard = (a, b) => fromXYZ(a.x * b.x, a.y * b.y, a.z * b.z)
+
+export const abs = ({ x, y, z }) =>
+  fromXYZ(Math.abs(x), Math.abs(y), Math.abs(z))
+
+export const max = ({ x, y, z }, v) =>
+  fromXYZ(Math.max(x, v), Math.max(y, v), Math.max(z, v))

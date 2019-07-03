@@ -158,8 +158,8 @@ export default {
   },
   geometry: {
     group: [
-      // ...cornellBox,
-      ...skyAndGround,
+      ...cornellBox,
+      // ...skyAndGround,
 
       // // TWISTED BOX
       // {
@@ -207,15 +207,15 @@ export default {
       {
         box: {
           // box: {
-          dimensions: [0.4, 0.3, 0.4],
-          origin: [0.5, -0.7, 0.5],
+          dimensions: [0.25, 0.6, 0.25],
+          origin: [0.4, -0.4, 0.4],
           // origin: [0, 0, 0],
-          radius: 0.1,
+          radius: 0,
           turns: 1 / 4,
           // material: glassMaterial
-          material: redMaterial
+          // material: redMaterial
           // material: mirrorMaterial
-          // material: whiteMaterial
+          material: whiteMaterial
         }
       }
       // // SPHERE

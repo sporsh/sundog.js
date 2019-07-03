@@ -75,10 +75,9 @@ const intersect = intersectable => distanceFunction => ray => {
   //   prevD = dt
   // }
 
-  let n = 0
   const nMax = 100
   // t = 0
-  while (t < tMax && n < nMax) {
+  while (t < tMax) {
     const point = v3.add(ray.origin, v3.scale(ray.direction, t))
     const d = distanceFunction(point)
     const dt = d * sign
@@ -120,7 +119,6 @@ const intersect = intersectable => distanceFunction => ray => {
       //   skipUntilFarEnoughFromSurface = false
       // }
     }
-    n++
   }
 }
 

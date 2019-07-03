@@ -12,7 +12,7 @@ import * as basis from './src/basis.js'
 import * as plane from './src/plane.js'
 import * as triangle from './src/triangle.js'
 import { boundIntersectRay, testBoxRay } from './src/box.js'
-import { intersectTorusRay } from './src/distancefield.js'
+import { intersectTorusRay, intersectBoxRay } from './src/distancefield.js'
 
 export const load = json => {
   return JSON.parse(json, reviver)
@@ -28,6 +28,7 @@ const reviver = (key, value) => {
     case 'normal':
     case 'center':
     case 'origin':
+    case 'dimensions':
     case 'albedo':
     case 'emittance':
     case 'a':
@@ -38,6 +39,8 @@ const reviver = (key, value) => {
       return intersectSphereRay(value)
     case 'torus':
       return intersectTorusRay(value)
+    case 'box':
+      return intersectBoxRay(value)
     case 'lambertian':
       return lambertianMaterial(value)
     case 'specular':

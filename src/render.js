@@ -2,7 +2,7 @@ import { fromXYZ, add, scale } from './vector3.js'
 import { fromV3, toAbgr32 } from './color.js'
 
 export const renderRegion = (trace, cameraRayThrough) => (
-  spp,
+  spp = 1,
   x0,
   y0,
   x1,
