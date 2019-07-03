@@ -5,7 +5,7 @@ const EPSILON = 0.001
 let doLog = true
 
 const intersect = intersectable => distanceFunction => ray => {
-  const epsilon = 0.0005
+  const epsilon = 0.0001
   let t = distanceFunction(ray.origin)
   let prevD = 0
   let omega = 1.2
@@ -14,7 +14,7 @@ const intersect = intersectable => distanceFunction => ray => {
   const sign = t < 0 ? -1 : 1
 
   // // Check how far the furthest ray distance is from the surface, and subtract that from the max
-  let tMax = Math.min(10, ray.tMax)
+  let tMax = Math.min(100, ray.tMax)
   tMax =
     tMax -
     sign * distanceFunction(v3.add(ray.origin, v3.scale(ray.direction, tMax)))
@@ -29,13 +29,24 @@ const intersect = intersectable => distanceFunction => ray => {
   while (t < tMax && n < nMax) {
     const point = v3.add(ray.origin, v3.scale(ray.direction, t))
     const d = distanceFunction(point)
-    const dt = d * sign * omega
+    const dt = d * sign
 
     // if (dt < epsilon && dt >= 0 && n > 1 && t > epsilon) {
-    // if (dt < epsilon && dt >= 0 && n > 10) {
-    if (dt < epsilon && dt >= 0 && t > epsilon) {
+    // if (dt < epsilon && dt > -epsilon && t > ray.tMin) {
+    // if (dt < epsilon && dt > 0) {
+    // if (dt < epsilon && dt >= 0 && t > epsilon) {
+    // if (dt < epsilon && t > ray.tMin && dt < prevD) {
+    // if (dt < epsilon && dt >= 0 && dt < prevD) {
+    // if (dt < epsilon && dt < prevD) {
+    if (dt < epsilon && dt < prevD && n > 20) {
       // if (dt < epsilon && t > epsilon * 1.2) {
       // Close enough to consider it a hit
+      if (doLog) {
+        console.log(
+          `HIT: n: ${n}, dt: ${dt}, prevD: ${prevD}, t: ${t}, tMax: ${tMax}`
+        )
+        doLog = false
+      }
       const normal = normalAtPoint(distanceFunction, point, epsilon)
       return {
         t,
@@ -52,7 +63,9 @@ const intersect = intersectable => distanceFunction => ray => {
       // We have a hit between here and previous somewhere... (bisect?)
       // t += 1.6 * dt
       if (doLog) {
-        console.log(`dt: ${dt}, prevD: ${prevD}, t: ${t}, tMax: ${tMax}`)
+        console.log(
+          `n: ${n}, dt: ${dt}, prevD: ${prevD}, t: ${t}, tMax: ${tMax}`
+        )
         doLog = false
       }
 
@@ -62,12 +75,12 @@ const intersect = intersectable => distanceFunction => ray => {
 
       t -= prevD
 
-      omega /= 2
+      omega = 1
       // } else if (dt < epsilon && t > epsilon) {
     } else {
       // No hit, continuing to next iteration
       prevD = dt
-      t += dt
+      t += dt * omega
     }
     n++
   }

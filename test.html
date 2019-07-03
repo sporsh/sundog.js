@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+  </head>
+  <body>
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <script type="text/javascript">
+      const fromXYZ = (x, y, z) => ({
+        x,
+        y,
+        z
+      })
+
+      const add = (a, b) => fromXYZ(a.x + b.x, a.y + b.y, a.z + b.z)
+
+      const cross = (a, b) => ({
+        x: a.y * b.z - a.z * b.y,
+        y: a.z * b.x - a.x * b.z,
+        z: a.x * b.y - a.y * b.x
+      })
+
+      const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z
+
+      const length2 = v => dot(v, v)
+
+      const length = v => Math.sqrt(length2(v))
+
+      const negate = ({ x, y, z }) => fromXYZ(-x, -y, -z)
+
+      const normalize = v => scale(v, 1 / length(v))
+
+      const scale = ({ x, y, z }, f) => fromXYZ(x * f, y * f, z * f)
+
+      const sub = (a, b) => fromXYZ(a.x - b.x, a.y - b.y, a.z - b.z)
+
+      const ZERO = fromXYZ(0, 0, 0)
+
+      const hadamard = (a, b) => fromXYZ(a.x * b.x, a.y * b.y, a.z * b.z)
+
+      const abs = ({ x, y, z }) =>
+        fromXYZ(Math.abs(x), Math.abs(y), Math.abs(z))
+
+      const max = ({ x, y, z }, v) =>
+        fromXYZ(Math.max(x, v), Math.max(y, v), Math.max(z, v))
+    </script>
+    <script type="text/javascript">
+      const canvas = document.getElementById('canvas')
+      const ctx = canvas.getContext('2d')
+
+      const drawSphere = ({ x, y }, distance) => {
+        ctx.strokeStyle = 'black'
+        ctx.beginPath()
+        ctx.ellipse(x, y, distance, distance, 0, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+
+      const drawBox = ({ dimensions: { x: w, y: h }, origin: { x, y } }) => {
+        ctx.strokeStyle = 'black'
+        ctx.strokeRect(x - w, y - h, w * 2, h * 2)
+      }
+
+      const drawPoint = ({ x, y }, r = 3) => {
+        ctx.fillStyle = 'red'
+        ctx.beginPath()
+        ctx.ellipse(x, y, r, r, 0, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
+      const intersectBoxRay = box => {
+        const { dimensions, radius, origin, turns } = box
+        const distanceFunction = point => {
+          const d = sub(abs(point), dimensions)
+          return (
+            length(max(d, 0)) + Math.min(Math.max(d.x, Math.max(d.y, d.z)), 0.0)
+          )
+        }
+
+        return intersect(box)(translate(origin)(distanceFunction))
+      }
+
+      const translate = offset => distanceFunction => point =>
+        distanceFunction(sub(point, offset))
+
+      const normalAtPoint = (distanceFunction, point, epsilon) => {
+        let d = offset => {
+          return distanceFunction(add(point, offset))
+        }
+
+        return normalize(
+          fromXYZ(
+            d(fromXYZ(epsilon, 0, 0)) - d(fromXYZ(-epsilon, 0, 0)),
+            d(fromXYZ(0, epsilon, 0)) - d(fromXYZ(0, -epsilon, 0)),
+            d(fromXYZ(0, 0, epsilon)) - d(fromXYZ(0, 0, -epsilon))
+          )
+        )
+      }
+
+      const intersect = intersectable => distanceFunction => ray => {
+        // TODO: Triangulate where ray intersects with tangent(point - (normal * d))
+
+        const epsilon = 4
+        // let origin = ray.origin
+        let t = distanceFunction(ray.origin)
+        let prevD = 0
+        let omega = 1
+
+        if (t == 0) {
+          debugger
+          // t = epsilon
+          // origin = add(origin, scale(ray.direction, t))
+          // origin = add(origin, scale(ray.direction, epsilon))
+          t = distanceFunction(add(ray.origin, scale(ray.direction, epsilon)))
+        }
+
+        // Starting off too close to surface, will skip until we reach min dist
+        let skipUntilFarEnoughFromSurface = t < epsilon ? true : false
+
+        // Check if we start outside or inside
+        const sign = t < 0 ? -1 : 1
+
+        // // Check how far the furthest ray distance is from the surface, and subtract that from the max
+        // let tMax = 1000
+        let tMax = Math.min(10000, ray.tMax)
+        const tMaxD = distanceFunction(
+          add(ray.origin, scale(ray.direction, tMax))
+        )
+        tMax -= sign * tMaxD
+
+        let n = 0
+        const nMax = 100
+        // t = 0
+        while (t < tMax && n < nMax) {
+          const point = add(ray.origin, scale(ray.direction, t))
+          drawPoint(point)
+          const d = distanceFunction(point)
+          const dt = d * sign
+
+          if (dt > 0) {
+            drawSphere(point, dt)
+          }
+          // debugger
+
+          if (dt < 0) {
+            // debugger
+            // Went through surface, stepping back
+            // We have a hit between here and previous somewhere... (bisect?)
+            // t += 1.6 * dt
+
+            // const newT = t - prevD
+            // prevD = (t - newT) / 2
+            // t = newT
+            prevD = prevD / 2
+            t -= prevD
+
+            omega = 1
+            // } else if (dt < epsilon && t > epsilon) {
+          } else if (dt < epsilon && dt < prevD) {
+            // debugger
+            // if (dt < epsilon && t > epsilon * 1.2) {
+            // Close enough to consider it a hit
+            const normal = normalAtPoint(distanceFunction, point, epsilon)
+            return {
+              t,
+              // point,
+              point: add(point, scale(normal, -dt)),
+              normal,
+              // basis: arbitraryBasisForNormal(directedNormal),
+              intersectable: intersectable
+            }
+          } else if (dt == 0) {
+            t += epsilon
+          } else {
+            // No hit, continuing to next iteration
+            prevD = dt
+            t += dt * omega
+          }
+          n++
+        }
+
+        console.log(`n: ${n}`)
+        console.log(`tMax: ${tMax}`)
+        console.log(`t: ${t}`)
+      }
+
+      function start() {
+        // debugger
+
+        const box = {
+          dimensions: fromXYZ(100, 100, 200),
+          origin: fromXYZ(canvas.width / 2, canvas.height / 2, -100)
+        }
+
+        const ray = {
+          origin: fromXYZ(20, 20, 0),
+          direction: normalize(fromXYZ(1, 0.42, 0)),
+          tMin: 0.00001,
+          tMax: 500
+        }
+
+        drawBox(box)
+
+        const hit1 = intersectBoxRay(box)(ray)
+        console.log('HIT1', hit1)
+
+        const hit2 = intersectBoxRay(box)({ ...ray, origin: hit1.point })
+        console.log('HIT2', hit2)
+      }
+
+      start()
+    </script>
+  </body>
+</html>
