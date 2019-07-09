@@ -1,8 +1,12 @@
 import { renderRegion } from './src/render.js'
-import { tracer } from './src/trace.js'
+import { iterative } from './src/pathTrace.js'
+import { cast } from './src/rayCast.js'
 import { load } from './loader.js'
 
 let renderRegion_ = () => {}
+
+// const trace = cast
+const trace = iterative
 
 onmessage = ({ data: msg }) => {
   switch (msg.type) {
@@ -14,7 +18,7 @@ onmessage = ({ data: msg }) => {
           maxDepth = 8
         } = load(msg.data)
         renderRegion_ = renderRegion(
-          tracer(intersectRay, maxDepth),
+          trace({ maxDepth })(intersectRay),
           cameraRayThrough
         )
       }

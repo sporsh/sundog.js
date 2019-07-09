@@ -9,7 +9,3 @@ export const intersectGroupRay = intersectables => ray =>
       return nearest
     }
   }, null)
-
-export const renderable = (intersectRay, material) => ({
-  intersectRay: ray => {}
-})

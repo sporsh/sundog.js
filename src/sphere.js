@@ -1,13 +1,12 @@
 import { add, sub, scale, dot, length2, normalize } from './vector3.js'
 import { arbitraryBasisForNormal } from './basis.js'
 
-export const intersectSphereRay = sphere => ({
+export const intersectSphereRay = ({ center, radius, material }) => ({
   origin,
   direction,
   tMin = 0,
   tMax = Infinity
 }) => {
-  const { center, radius } = sphere
   // Vector pointing from sphere center to ray origin
   const m = sub(origin, center)
 
@@ -43,7 +42,7 @@ export const intersectSphereRay = sphere => ({
       t,
       point,
       basis: arbitraryBasisForNormal(normal),
-      intersectable: sphere
+      material
     }
   }
 }

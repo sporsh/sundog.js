@@ -1,9 +1,7 @@
 import { sub, cross, dot, add, negate, scale, normalize } from './vector3.js'
 import { arbitraryBasisForNormal } from './basis.js'
 
-export const intersectTriangleRay = triangle => {
-  const { a, b, c } = triangle
-
+export const intersectTriangleRay = ({ a, b, c, material }) => {
   const ab = sub(b, a)
   const ac = sub(c, a)
   const normal = cross(ab, ac)
@@ -42,7 +40,7 @@ export const intersectTriangleRay = triangle => {
       t,
       point: add(origin, scale(direction, t)),
       basis: basis,
-      intersectable: triangle
+      material
     }
   }
 }
