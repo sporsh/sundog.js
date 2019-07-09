@@ -12,7 +12,23 @@ import * as basis from './src/basis.js'
 import * as plane from './src/plane.js'
 import * as triangle from './src/triangle.js'
 import { boundIntersectRay, testBoxRay } from './src/box.js'
-import { intersectTorusRay } from './src/distancefield.js'
+import {
+  intersectTorusRay,
+  intersectBoxRay,
+  dfSphere,
+  dfBox,
+  dfTorus,
+  dfOctahedron,
+  dfTranslate,
+  dfRotate,
+  dfTwist,
+  dfIntersect,
+  dfSubtract,
+  dfUnion,
+  dfDisplace,
+  dfRepeat,
+  intersect
+} from './src/distancefield.js'
 
 export const load = json => {
   return JSON.parse(json, reviver)
@@ -28,6 +44,7 @@ const reviver = (key, value) => {
     case 'normal':
     case 'center':
     case 'origin':
+    case 'dimensions':
     case 'albedo':
     case 'emittance':
     case 'a':
@@ -38,6 +55,8 @@ const reviver = (key, value) => {
       return intersectSphereRay(value)
     case 'torus':
       return intersectTorusRay(value)
+    case 'box':
+      return intersectBoxRay(value)
     case 'lambertian':
       return lambertianMaterial(value)
     case 'specular':
@@ -58,12 +77,45 @@ const reviver = (key, value) => {
       return boundIntersectRay(test, intersect)
     }
     case 'plane':
-      return plane.intersectDirectedPlaneRay({
+      // return plane.intersectDirectedPlaneRay({
+      return plane.intersectPlaneRay({
         ...value,
         basis: basis.arbitraryBasisForNormal(value.normal)
       })
     case 'triangle':
       return triangle.intersectTriangleRay(value)
+    case 'distancefunction': {
+      const dfs = value.map(v => Object.values(v)[0])
+      return point => dfs.reduceRight((p, df) => df(p), point)
+    }
+    // return value.map(v => Object.values(v)[0])
+    case 'dfSubtract':
+      return dfSubtract(value.map(v => v.distancefunction))
+    case 'dfUnion':
+      return dfUnion(value.map(v => v.distancefunction))
+    case 'dfSphere':
+      return dfSphere(value)
+    // return dfDisplace(2)(dfSphere(value))
+    case 'dfBox':
+      return dfBox(v3.fromXYZ(...value))
+    case 'dfTorus':
+      return dfTorus(value)
+    case 'dfOctahedron':
+      return dfOctahedron(value)
+    case 'dfTranslate':
+      return dfTranslate(v3.fromXYZ(...value))
+    case 'dfRotate':
+      return dfRotate(value)
+    case 'dfTwist':
+      return dfTwist(value)
+    case 'dfRepeat':
+      return dfRepeat(v3.fromXYZ(...value))
+    case 'implicit':
+      return dfIntersect(value)(value.distancefunction)
+    // case 'dfBox':
+    //   return dfBox(v3.fromXYZ(...value))
+    // case 'dfTranslate':
+    //   return dfTranslate(v3.fromXYZ(...value))
     default:
       return value
   }
