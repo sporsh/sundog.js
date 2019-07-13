@@ -59,10 +59,31 @@ export const intersect = ({ material }) => distanceFunction => ray => {
       // const newT = t - prevD
       // prevD = (t - newT) / 2
       // t = newT
-      prevD = prevD / 2
-      t -= prevD
 
-      omega = 1
+      // // DEBUG WHEN OVERSTEPPING
+      // const normal = normalAtPoint(distanceFunction, point, ray.tMin)
+      // return {
+      //   t,
+      //   point: v3.add(point, v3.scale(normal, -d)),
+      //   basis: arbitraryBasisForNormal(normal),
+      //   material: () => ({
+      //     pdf: () => v3.fromXYZ(0, 0, 0),
+      //     emittance: () => v3.fromXYZ(1, 0, 1)
+      //   })
+      // }
+
+      // prevD = prevD / 2
+      // t -= prevD
+
+      // sign = -sign
+      // prevD = Math.min(-prevD, dt)
+      // t += prevD
+
+      t += Math.min(-prevD, dt)
+      // prevD = dt
+      // t += dt * omega
+
+      omega *= 0.5
     } else if (dt < ray.tMin) {
       // Close enough to consider it a hit
       const normal = normalAtPoint(distanceFunction, point, ray.tMin)
@@ -91,6 +112,7 @@ export const intersect = ({ material }) => distanceFunction => ray => {
       // No hit, continuing to next iteration
       prevD = dt
       t += dt * omega
+      omega = 1
     }
   }
 }
@@ -171,18 +193,49 @@ export const dfOctahedron = s => point => {
 
 export const dfTranslate = offset => point => v3.sub(point, offset)
 
+// export const dfRotate = k => ({ x, y, z }) => {
+//   const cost = Math.cos(k)
+//   const sint = Math.sin(k)
+//   // return v3.fromXYZ(cost * x + -sint * z, y, sint * x + cost * z)
+//   return v3.fromXYZ(x * cost - z * sint, y, z * cost + x * sint)
+// }
+
 export const dfRotate = k => ({ x, y, z }) => {
-  const c = Math.cos(k)
-  const s = Math.sin(k)
-  return v3.fromXYZ(c * x + -s * z, y, s * x + c * z)
+  const cost = Math.cos(k)
+  const sint = Math.sin(k)
+
+  return v3.fromXYZ(x * cost + z * sint, y, z * cost - x * sint)
+  // return v3.fromXYZ(x * cost - z * sint, y, z * cost + x * sint)
 }
 
-export const dfTwist = turns => ({ x, y, z }) => {
-  const k = turns
-  const c = Math.cos(k * y)
-  const s = Math.sin(k * y)
-  return v3.fromXYZ(c * x + -s * z, y, s * x + c * z)
-}
+// export const dfTwist = theta => ({ x, y, z }) => {
+//   const k = theta
+//   const cost = Math.cos(k * y)
+//   const sint = Math.sin(k * y)
+//   return v3.fromXYZ(cost * x + -sint * z, y, sint * x + cost * z)
+// }
+
+// export const dfTwist = theta => ({ x, y, z }) => {
+//   // vec2 v = vec2(x, y);
+//   // mat2 m = mat2(cost, -sint,  sint, cost);
+//   // vec2 w = m * v; // = vec2(cost * x + sint * y, -sint * x + cost * y)
+//   //
+//   //
+//   // const float k = 10.0; // or some other amount
+//   // float cost = cos(k*p.y);
+//   // float sint = sin(k*p.y);
+//   // mat2  m = mat2(cost,-sint,sint,cost);
+//   // vec3  q = vec3(m*p.xz,p.y);
+//   // return primitive(q);
+//
+//   const k = theta
+//   const cost = Math.cos(k * y)
+//   const sint = Math.sin(k * y)
+//   // return v3.fromXYZ(cost * x + -sint * z, y, sint * x + cost * z)
+//   return v3.fromXYZ(cost * x + sint * z, y, -sint * x + cost * z)
+// }
+
+export const dfTwist = theta => point => dfRotate(theta * point.y)(point)
 
 // Combinations
 
