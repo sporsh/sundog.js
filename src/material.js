@@ -1,4 +1,4 @@
-import { ZERO, normalize, negate, scale, sub, dot } from './vector3.js'
+import * as v3 from './vector3.js'
 import { toStandardBasis } from './basis.js'
 
 const lambertianScatter = (incoming, surface) => {
@@ -10,19 +10,21 @@ const lambertianScatter = (incoming, surface) => {
 
   const phi = 2 * Math.PI * u2
 
-  return normalize(
+  const direction = v3.normalize(
     toStandardBasis(surface, {
       x: sinTheta * Math.cos(phi),
       y: cosTheta,
       z: sinTheta * Math.sin(phi)
     })
   )
+
+  return { direction, pdf: 1 }
 }
 
 const lambertianBsdf = albedo => {
-  const distribution = scale(albedo, 1 / Math.PI)
+  const distribution = v3.scale(albedo, 1 / Math.PI)
   return (incoming, outgoing, { normal }) =>
-    scale(distribution, dot(normal, incoming))
+    v3.scale(distribution, v3.dot(normal, incoming))
 }
 
 export const lambertianMaterial = ({ albedo, emittance = ZERO }) => ({
@@ -34,19 +36,21 @@ export const lambertianMaterial = ({ albedo, emittance = ZERO }) => ({
 
 export const specularMaterial = ({ albedo, emittance = ZERO }) => ({
   pdf: () => albedo,
-  scatter: (incoming, { normal }) =>
-    sub(incoming, scale(normal, 2 * dot(normal, incoming))),
+  scatter: (incoming, { normal }) => ({
+    direction: v3.sub(incoming, v3.scale(normal, 2 * v3.dot(normal, incoming))),
+    pdf: 1
+  }),
   emittance: () => emittance
 })
 
 export const transmissiveMaterial = ({
   albedo,
-  emittance = ZERO,
+  emittance = v3.ZERO,
   refractiveIndex
 }) => ({
   pdf: () => albedo,
   scatter: (incoming, { normal }) => {
-    const cosi = dot(normal, incoming)
+    const cosi = v3.dot(normal, incoming)
     const eta =
       cosi < 0
         ? // Entering
@@ -58,16 +62,16 @@ export const transmissiveMaterial = ({
         ? // Entering
           normal
         : // Exiting
-          negate(normal)
+          v3.negate(normal)
     const cost2 = 1 - eta * eta * (1 - cosi * cosi)
     if (cost2 < 0) {
       // Total internal reflection
-      return sub(incoming, scale(normal_, 2 * cosi))
+      return v3.sub(incoming, v3.scale(normal_, 2 * cosi))
     }
-    return normalize(
-      sub(
-        scale(incoming, eta),
-        scale(normal_, eta * Math.abs(cosi) + Math.sqrt(cost2))
+    return v3.normalize(
+      v3.sub(
+        v3.scale(incoming, eta),
+        v3.scale(normal_, eta * Math.abs(cosi) + Math.sqrt(cost2))
       )
     )
   },
@@ -83,33 +87,46 @@ const frDiel = (cosi, cost, etai, etat) => {
 
 export const fresnelSpecularTransmissiveMaterial = ({
   albedo,
-  emittance = ZERO,
+  emittance = v3.ZERO,
   refractiveIndex
 }) => ({
   pdf: () => albedo,
   emittance: () => emittance,
   scatter: (incoming, { normal }) => {
-    const cosi = dot(normal, incoming)
+    const cosi = v3.dot(normal, incoming)
     const { etat, etai, normal_ } =
       cosi < 0
         ? // Entering
           { etat: refractiveIndex, etai: 1, normal_: normal }
         : // Exiting
-          { etat: 1, etai: refractiveIndex, normal_: negate(normal) }
+          { etat: 1, etai: refractiveIndex, normal_: v3.negate(normal) }
     const eta = etai / etat
     const sint = eta * Math.sqrt(Math.max(0, 1 - cosi * cosi))
 
     if (sint >= 1) {
-      //  Total internal refraction
-      return sub(incoming, scale(normal_, 2 * cosi))
+      //  Total internal reflection
+      return {
+        direction: v3.sub(incoming, v3.scale(normal_, 2 * cosi)),
+        pdf: 1
+      }
     } else {
       const cost = Math.sqrt(Math.max(0, 1 - sint * sint))
-      if (frDiel(Math.abs(cosi), cost, etai, etat) < Math.random()) {
-        return normalize(
-          sub(scale(incoming, eta), scale(normal_, eta * Math.abs(cosi) + cost))
-        )
+      const fresnel = frDiel(Math.abs(cosi), cost, etai, etat) < Math.random()
+      if (fresnel) {
+        return {
+          direction: v3.normalize(
+            v3.sub(
+              v3.scale(incoming, eta),
+              v3.scale(normal_, eta * Math.abs(cosi) + cost)
+            )
+          ),
+          pdf: fresnel
+        }
       } else {
-        return sub(incoming, scale(normal_, 2 * cosi))
+        return {
+          direction: v3.sub(incoming, v3.scale(normal_, 2 * cosi)),
+          pdf: 1 - fresnel
+        }
       }
     }
   }

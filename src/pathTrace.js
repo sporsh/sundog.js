@@ -1,10 +1,8 @@
 import * as v3 from './vector3.js'
 
-const RUSSIAN_ROULETTE_THRESHOLD = 8
-
 export const iterative = ({
   maxDepth = 8,
-  russianRouletteThreshold = 3
+  russianRouletteThreshold = 0
 }) => intersect => ray => {
   let radiance = v3.fromXYZ(0, 0, 0)
   let weight = v3.fromXYZ(1, 1, 1)
@@ -20,18 +18,32 @@ export const iterative = ({
       let prob = material.pdf(ray.direction, basis)
       const pMax = Math.max(prob.x, prob.y, prob.z)
 
-      if (depth >= russianRouletteThreshold) {
-        //  Russian roulette
-        if (Math.random() > pMax) {
-          return radiance
-        }
-        prob = v3.scale(prob, 1 / pMax)
+      // if (depth >= russianRouletteThreshold) {
+      //   //  Russian roulette
+      //   if (Math.random() > pMax) {
+      //     return radiance
+      //   }
+      //   prob = v3.scale(prob, 1 / pMax)
+      // }
+      if (pMax <= 0) {
+        return radiance
       }
 
+      const { direction, pdf } = material.scatter(ray.direction, basis)
+
       weight = v3.hadamard(weight, prob)
+      weight = v3.scale(weight, 1 / pdf)
+
+      if (depth > russianRouletteThreshold) {
+        const q = Math.max(0.05, 1 - Math.max(weight.x, weight.y, weight.z))
+        if (Math.random() < q) {
+          return radiance
+        }
+        weight = v3.scale(weight, 1 / (1 - q))
+      }
 
       ray.origin = point
-      ray.direction = material.scatter(ray.direction, basis)
+      ray.direction = direction
       depth++
     } else {
       return radiance
@@ -40,48 +52,61 @@ export const iterative = ({
   return radiance
 }
 
-export const recursive = (intersect, maxDepth = 8) => {
+export const recursive = ({
+  maxDepth = 8,
+  russianRouletteThreshold = 2
+}) => intersect => {
   const trace = (ray, radiance, weight, depth) => {
+    if (depth > maxDepth) {
+      return radiance
+    }
+
     const intersection = intersect(ray)
     if (intersection) {
-      const {
-        point,
-        basis,
-        intersectable: {
-          material: { pdf, emittance, scatter }
-        }
-      } = intersection
-      let prob = pdf(ray.direction, basis)
-      const pMax = Math.max(Math.max(prob.x, prob.y), prob.z)
+      const { point, basis, material } = intersection
+
+      let prob = material.pdf(ray.direction, basis)
+      // if (Math.max(prob.x, prob.y, prob.z) <= 0) {
+      //   return radiance
+      // }
 
       const newRadiance = v3.add(
         radiance,
-        v3.hadamard(emittance(ray.direction), weight)
+        v3.hadamard(material.emittance(ray.direction), weight)
       )
 
-      //  Russian roulette (after a couple of bounces)
-      if (pMax <= 0 || depth > RUSSIAN_ROULETTE_THRESHOLD) {
-        //  Russian roulette
-        if (Math.random() > pMax) {
-          return radiance
-        }
-        prob = v3.scale(prob, 1 / pMax)
-      }
+      const { direction, pdf } = material.scatter(ray.direction, basis)
+
+      // const newWeight = v3.scale(v3.hadamard(weight, prob), 1 / pdf)
+      const newWeight = v3.scale(v3.hadamard(weight, prob), pdf)
+
+      // // Russian roulette (after a couple of bounces)
+      // const pMax = Math.max(weight.x, weight.y, weight.z)
+      //
+      // if (pMax <= 0 || depth > russianRouletteThreshold) {
+      //   //  Russian roulette
+      //   if (Math.random() > pMax) {
+      //     return newRadiance
+      //   }
+      //   weight = v3.scale(weight, 1 / pMax)
+      // }
+      //
       // if (
-      //   (pMax >= 1 && depth > maxDepth) ||
+      //   depth > maxDepth ||
       //   pMax <= 0 ||
-      //   (depth > RUSSIAN_ROULETTE_THRESHOLD && Math.random() > pMax)
+      //   (depth > russianRouletteThreshold && Math.random() > pMax)
       // ) {
       //   return newRadiance
       // }
 
       const newRay = {
         origin: point,
-        direction: scatter(ray.direction, basis),
+        direction,
         tMin: ray.tMin,
         tMax: ray.tMax
       }
-      const newWeight = v3.hadamard(weight, prob)
+      // const newWeight = v3.hadamard(weight, prob)
+      // const newWeight = weight
       return trace(newRay, newRadiance, newWeight, depth + 1)
     } else {
       return radiance
