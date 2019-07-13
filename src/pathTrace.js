@@ -11,7 +11,8 @@ export const iterative = ({
   while (depth < maxDepth) {
     const intersection = intersect(ray)
     if (intersection) {
-      const { point, basis, material } = intersection
+      const { point, basis } = intersection
+      const material = intersection.material(intersection)
       const emittance = material.emittance(ray.direction)
       radiance = v3.add(radiance, v3.hadamard(emittance, weight))
 

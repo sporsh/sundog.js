@@ -5,7 +5,8 @@ import {
   lambertianMaterial,
   specularMaterial,
   transmissiveMaterial,
-  fresnelSpecularTransmissiveMaterial
+  fresnelSpecularTransmissiveMaterial,
+  checkerTexture
 } from './src/material.js'
 import { intersectGroupRay } from './src/group.js'
 import * as basis from './src/basis.js'
@@ -66,6 +67,8 @@ const reviver = (key, value) => {
       return fresnelSpecularTransmissiveMaterial(value)
     case 'transmissive':
       return transmissiveMaterial(value)
+    case 'checkerTexture':
+      return checkerTexture(value)
     case 'material':
       return Object.values(value)[0]
     case 'geometry':

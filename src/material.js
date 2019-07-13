@@ -27,14 +27,14 @@ const lambertianBsdf = albedo => {
     v3.scale(distribution, v3.dot(normal, incoming))
 }
 
-export const lambertianMaterial = ({ albedo, emittance = ZERO }) => ({
+export const lambertianMaterial = ({ albedo, emittance = v3.ZERO }) => () => ({
   bsdf: lambertianBsdf(albedo),
   pdf: () => albedo,
   scatter: lambertianScatter,
   emittance: () => emittance
 })
 
-export const specularMaterial = ({ albedo, emittance = ZERO }) => ({
+export const specularMaterial = ({ albedo, emittance = v3.ZERO }) => () => ({
   pdf: () => albedo,
   scatter: (incoming, { normal }) => ({
     direction: v3.sub(incoming, v3.scale(normal, 2 * v3.dot(normal, incoming))),
@@ -43,7 +43,7 @@ export const specularMaterial = ({ albedo, emittance = ZERO }) => ({
   emittance: () => emittance
 })
 
-export const transmissiveMaterial = ({
+export const transmissiveMaterial = () => ({
   albedo,
   emittance = v3.ZERO,
   refractiveIndex
@@ -89,7 +89,7 @@ export const fresnelSpecularTransmissiveMaterial = ({
   albedo,
   emittance = v3.ZERO,
   refractiveIndex
-}) => ({
+}) => () => ({
   pdf: () => albedo,
   emittance: () => emittance,
   scatter: (incoming, { normal }) => {
@@ -131,3 +131,18 @@ export const fresnelSpecularTransmissiveMaterial = ({
     }
   }
 })
+
+export const checkerTexture = ({ black, white, size }) => ({
+  point,
+  basis
+}) => {
+  const x = Math.floor(point.x * size.x)
+  const y = Math.floor(point.y * size.y)
+  const z = Math.floor(point.z * size.z)
+  return (x + y + z) % 2 ? white.material() : black.material()
+}
+
+export const normalTexture = () => ({ basis: { normal } }) => {
+  const albedo = v3.scale(v3.add(normal, v3.fromXYZ(1, 1, 1)), 0.5)
+  return lambertianMaterial({ albedo })()
+}
