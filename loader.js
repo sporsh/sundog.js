@@ -1,13 +1,7 @@
 import * as v3 from './src/vector3.js'
 import * as camera from './src/camera.js'
 import { intersectSphereRay } from './src/sphere.js'
-import {
-  lambertianMaterial,
-  specularMaterial,
-  transmissiveMaterial,
-  fresnelSpecularTransmissiveMaterial,
-  checkerTexture
-} from './src/material.js'
+import * as material from './src/material.js'
 import { intersectGroupRay } from './src/group.js'
 import * as basis from './src/basis.js'
 import * as plane from './src/plane.js'
@@ -60,15 +54,17 @@ const reviver = (key, value) => {
     case 'box':
       return intersectBoxRay(value)
     case 'lambertian':
-      return lambertianMaterial(value)
+      return material.lambertianMaterial(value)
     case 'specular':
-      return specularMaterial(value)
+      return material.specularMaterial(value)
     case 'fresnelSpecularTransmissive':
-      return fresnelSpecularTransmissiveMaterial(value)
+      return material.fresnelSpecularTransmissiveMaterial(value)
     case 'transmissive':
-      return transmissiveMaterial(value)
+      return material.transmissiveMaterial(value)
+    case 'checkerCube':
+      return material.checkerCube(value)
     case 'checkerTexture':
-      return checkerTexture(value)
+      return material.checkerTexture(value)
     case 'material':
       return Object.values(value)[0]
     case 'geometry':
@@ -81,8 +77,8 @@ const reviver = (key, value) => {
       return boundIntersectRay(test, intersect)
     }
     case 'plane':
-      // return plane.intersectDirectedPlaneRay({
-      return plane.intersectPlaneRay({
+      return plane.intersectDirectedPlaneRay({
+        // return plane.intersectPlaneRay({
         ...value,
         basis: basis.arbitraryBasisForNormal(value.normal)
       })

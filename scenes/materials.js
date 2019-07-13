@@ -71,9 +71,17 @@ export const green = {
   }
 }
 
+export const checkerCube = {
+  checkerCube: {
+    size: { x: 3, y: 3, z: 3 },
+    white: { material: white },
+    black: { material: black }
+  }
+}
+
 export const checker = {
   checkerTexture: {
-    size: { x: 4, y: 4, z: 4 },
+    size: { x: 10, y: 10, z: 10 },
     white: { material: white },
     black: { material: black }
   }

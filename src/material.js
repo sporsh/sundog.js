@@ -132,17 +132,93 @@ export const fresnelSpecularTransmissiveMaterial = ({
   }
 })
 
-export const checkerTexture = ({ black, white, size }) => ({
-  point,
-  basis
-}) => {
+export const checkerCube = ({ black, white, size }) => ({ point }) => {
   const x = Math.floor(point.x * size.x)
   const y = Math.floor(point.y * size.y)
   const z = Math.floor(point.z * size.z)
   return (x + y + z) % 2 ? white.material() : black.material()
 }
 
+export const checkerTexture = ({ black, white, size }) => ({
+  point,
+  basis
+}) => {
+  // const x = Math.floor(point.x * size.x)
+  // const y = Math.floor(point.y * size.y)
+  // const z = Math.floor(point.z * size.z)
+  // return (x + y + z) % 2 ? white.material() : black.material()
+
+  const { u, v } = sphericalMapping(basis.normal)
+  const x = Math.floor(u * size.x)
+  const y = Math.floor(v * size.y)
+  return (x + y) % 2 ? white.material() : black.material()
+
+  // const x = Math.floor(basis.tangent.y * size.x)
+  // const y = Math.floor(basis.tangent.x * size.y)
+  // const z = 0 //Math.floor(basis.bitangent.x * size.z)
+  // return (x + y + z) % 2 ? white.material() : black.material()
+
+  // const x = Math.floor(basis.normal.y * size.x)
+  // const y = Math.floor(basis.normal.x * size.y)
+  // const z = 0 //Math.floor(basis.bitangent.x * size.z)
+  // return (x + y + z) % 2 ? white.material() : black.material()
+
+  // const x = Math.floor(
+  //   (basis.normal.x + basis.normal.y + basis.normal.z) * size.x
+  // )
+  // const y = Math.floor(
+  //   (basis.tangent.x + basis.tangent.y + basis.tangent.z) * size.x
+  // )
+  // const z = Math.floor(
+  //   (basis.bitangent.x + basis.bitangent.y + basis.bitangent.z) * size.x
+  // )
+  // // const y = Math.floor(
+  // //   Math.min(basis.normal.x, basis.normal.y, basis.normal.z) * size.x
+  // // )
+  // // const y = Math.floor(basis.normal.x * size.y)
+  // // const z = Math.floor(basis.normal.z * size.z)
+  // // return (x + (y + z)) % 2 ? white.material() : black.material()
+  // return y % 2 ? white.material() : black.material()
+
+  // const n = v3.scale(v3.add(basis.normal, v3.fromXYZ(1, 1, 1)), 0.5)
+  // const x = 0 //Math.floor(n.x * size.x)
+  // const y = Math.floor(n.y * size.y)
+  // const z = Math.floor(n.z * size.z)
+  // return (x + y + z) % 2 ? white.material() : black.material()
+}
+
 export const normalTexture = () => ({ basis: { normal } }) => {
   const albedo = v3.scale(v3.add(normal, v3.fromXYZ(1, 1, 1)), 0.5)
   return lambertianMaterial({ albedo })()
 }
+
+const sphericalMapping = vector => {
+  const theta = sphericalTheta(vector)
+  const phi = sphericalPhi(vector)
+
+  const u = theta / Math.PI
+  const v = phi / (Math.PI * 2)
+  // const u = theta / (Math.PI * 2)
+  // const v = phi / (Math.PI * 2)
+
+  return { u, v }
+
+  // const x = Math.floor(u * size.x)
+  // const y = Math.floor(v * size.y)
+  // return (x + y) % 2 ? white.material() : black.material()
+}
+
+// const sphericalTheta = ({ x, y, z }) => Math.acos(clampUnit(z))
+const sphericalTheta = ({ y }) => Math.acos(clampUnit(y))
+// const sphericalTheta = ({ x, y, z }) => Math.acos(z)
+// return std::acos(Clamp(v.z, -1, 1));
+
+const sphericalPhi = ({ x, y, z }) => {
+  // const p = Math.atan2(y, x)
+  const p = Math.atan2(x, z)
+  return p < 0 ? p + 2 * Math.PI : p
+}
+
+const clamp = (min, max) => value => Math.max(min, Math.min(value, max))
+
+const clampUnit = clamp(-1, 1)
