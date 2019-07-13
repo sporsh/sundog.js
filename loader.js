@@ -17,6 +17,7 @@ import {
   intersectBoxRay,
   dfSphere,
   dfBox,
+  dfCylinder,
   dfTorus,
   dfOctahedron,
   dfTranslate,
@@ -100,6 +101,9 @@ const reviver = (key, value) => {
       return dfBox(v3.fromXYZ(...value))
     case 'dfTorus':
       return dfTorus(value)
+    case 'dfCylinder':
+      return dfCylinder(value)
+    // return dfCylinder(v3.fromXYZ(...value))
     case 'dfOctahedron':
       return dfOctahedron(value)
     case 'dfTranslate':

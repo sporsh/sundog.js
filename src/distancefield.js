@@ -16,8 +16,14 @@ export const intersect = ({ material }) => distanceFunction => ray => {
 
   t += dt
 
+  const nMax = 200
+  // const nMax = 100
+  let n = 0
+
   // Avoid self-intersection
+  // while (dt < ray.tMin && n++ < nMax) {
   while (dt < ray.tMin) {
+    // while (dt < ray.tMin && t < 2 * ray.tMin) {
     point = v3.add(ray.origin, v3.scale(ray.direction, t))
     d = distanceFunction(point)
 
@@ -31,15 +37,13 @@ export const intersect = ({ material }) => distanceFunction => ray => {
       t += dt
     }
   }
+  // n = 0
 
   // Check how far the furthest ray distance is from the surface, and subtract that from the max
   let tMax = Math.min(1000, ray.tMax)
   tMax =
     tMax -
     sign * distanceFunction(v3.add(ray.origin, v3.scale(ray.direction, tMax)))
-
-  const nMax = 100
-  let n = 0
 
   while (t < tMax && n++ < nMax) {
     // while (t < tMax) {
@@ -73,10 +77,11 @@ export const intersect = ({ material }) => distanceFunction => ray => {
 
       return {
         t,
-        point,
+        // point,
         // point: v3.add(point, v3.scale(normal, -dt * sign)),
         // point: v3.add(point, v3.scale(normal, -dt)),
         // point: v3.add(point, v3.scale(normal, d)),
+        point: v3.add(point, v3.scale(normal, -d)),
         basis: arbitraryBasisForNormal(normal),
         // basis: arbitraryBasisForNormal(v3.scale(normal, sign)),
         // basis: arbitraryBasisForNormal(directedNormal),
@@ -121,6 +126,41 @@ export const dfTorus = ({ major, minor }) => ({ x, y, z }) => {
   const l1 = z
   return Math.sqrt(l0 * l0 + l1 * l1) - minor
 }
+
+export const dfCappedCylinder = ({ height, radius }) => ({ x, y, z }) => {
+  const dx = Math.abs(Math.sqrt(x * x + z * z) - height)
+  const dy = Math.abs(y - radius)
+
+  const dlx = Math.max(dx, 0)
+  const dly = Math.max(dy, 0)
+  const dl = Math.sqrt(dlx * dlx + dly * dly)
+  return Math.min(Math.max(dx, dy), 0) + dl
+  // return (
+  //   Math.min(Math.max(dx, dy), 0) + v3.length(v3.max(v3.fromXYZ(dx, dy, 0), 0))
+  // )
+}
+
+export const dfCylinder = ({ height, radius }) => ({ x, y, z }) => {
+  const d = Math.sqrt(x * x + z * z) - radius
+  return Math.max(d, Math.abs(y) - height)
+}
+
+// export const dfCylinder = c => p => {
+//   const x = p.x - c.x
+//   const y = p.z - c.y
+//   const l = Math.sqrt(x * x + y * y)
+//   return l - c.z
+// }
+
+// float sdCappedCylinder( vec3 p, float h, float r )
+// {
+//   vec2 d = abs(vec2(length(p.xz),p.y)) - vec2(h,r);
+//   return
+// min(
+//   max(d.x,d.y)
+//   ,0.0)
+//  + length(max(d,0.0));
+// }
 
 export const dfOctahedron = s => point => {
   const p = v3.abs(point)
@@ -167,8 +207,41 @@ export const dfDisplace = v => df => point => {
 
 // REPETITION
 
+// const dfMod2 = size => point => {
+//   const halfSize = size * 0.5
+//   const c = v3.floor(v3.scale(v3.addAll(point, halfSize), 1 / size))
+//   return v3.mod(v3.scale(v3.addAll(point, halfSize),))
+//   // c = floor((p + size*0.5)/size);
+//   // p = mod(p + size*0.5,size) - size*0.5;
+//   // return c;
+// }
+
 export const dfRepeat = c => p => {
-  return v3.sub(v3.fromXYZ(p.x % c.x, p.y % c.y, p.z % c.z), v3.scale(c, 0.5))
+  // return v3.sub(v3.fromXYZ(p.x % c.x, p.y % c.y, p.z % c.z), v3.scale(c, 0.5))
+
+  // return v3.sub(v3.mod(p, c.x), v3.scale(c, 0.5))
+  // return v3.mod(v3.addAll(p, c.x * 0.5), c.x) - c.x * 0.5
+
+  // const q = v3.fromXYZ((p.x % 1.0) - 0.5, p.y, p.z)
+  // // const s = 1.0
+  // // return v3.addAll(v3.abs(q), -s)
+  // return v3.abs(q)
+
+  // return v3.add(v3.mod(p, c), v3.scale(c, -0.5))
+  // vec3 q = mod(p,c)-0.5*c;
+  // return v3.mod(p, c)
+
+  // return v3.add(v3.mod(p, c), v3.scale(c, -0.5))
+  // return v3.mod(v3.add(p, v3.scale(c, -0.5)), c)
+  // return v3.add(v3.mod(p, c), v3.scale(c, 0.5))
+
+  const cHalf = v3.scale(c, 0.5)
+  return v3.sub(v3.mod(v3.add(p, cHalf), c), cHalf)
+
+  // return v3.mod(v3.add(p, v3.scale(c, 0.5)), c)
+  // return v3.add(v3.mod(p, c), v3.scale(c, 0.5))
+  // return v3.add(v3.mod(p, c), v3.scale(c, -0.5))
+
   // const q = v3.fromXYZ(p.x % c.x - c.x * 0.5, p.y % c.y, p.z % c.z)
   // const q = v3.fromXYZ((p.x % c.x) - c.x * 0.5, p.y, p.z)
   // return v3.sub(v3.abs(q), v3.fromXYZ(1, 1, 1))
