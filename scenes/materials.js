@@ -87,6 +87,14 @@ export const checker = {
   }
 }
 
+export const grid = {
+  proceduralGridTexture: {
+    thickness: 0.005,
+    background: { material: white },
+    grid: { material: black }
+  }
+}
+
 export const mirrorChecker = {
   checkerTexture: {
     size: { x: 10, y: 10, z: 10 },

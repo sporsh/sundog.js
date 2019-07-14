@@ -63,6 +63,8 @@ const reviver = (key, value) => {
       return material.transmissiveMaterial(value)
     case 'checkerCube':
       return material.checkerCube(value)
+    case 'proceduralGridTexture':
+      return material.proceduralGridTexture(value)
     case 'checkerTexture':
       return material.checkerTexture(value)
     case 'material':

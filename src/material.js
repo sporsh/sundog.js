@@ -139,6 +139,24 @@ export const checkerCube = ({ black, white, size }) => ({ point }) => {
   return (x + y + z) % 2 ? white.material() : black.material()
 }
 
+
+export const proceduralGridTexture = ({ thickness = 0.01 }) => {
+  const delta = v => Math.abs(v - Math.floor(v + 0.5))
+  const isline = v => (delta(v) > thickness ? 1 : 0)
+  const grid = ({ x, y, z }) => isline(x) * isline(z)
+
+  return ({ point }) => {
+    const c =
+      grid(point) *
+        grid(v3.scale(point, 10.0)) *
+        // grid(v3.scale(point, 100.0)) *
+        0.6 +
+      0.3
+
+    return lambertianMaterial({ albedo: v3.fromXYZ(c, c, c) })()
+  }
+}
+
 export const checkerTexture = ({ black, white, size }) => ({
   point,
   basis
