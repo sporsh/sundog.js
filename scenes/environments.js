@@ -171,7 +171,8 @@ export const skyAndGround = [
     plane: {
       normal: [0, 1, 0],
       d: -1,
-      material: material.checkerCube
+      // material: material.checkerCube
+      material: material.grid
       // material: {
       //   lambertian: {
       //     // albedo: [0xff / 255, 0xe7 / 255, 0xd9 / 255]

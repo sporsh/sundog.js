@@ -1,11 +1,12 @@
 import * as dat from 'dat.gui'
-// import scene from './scenes/scene_refcation_test.js'
-import scene from './scenes/scene.js'
+// import scene from './scenes/refcation_test.scene.js'
+// import scene from './scenes/scene.js'
 // import scene from './scenes/cornell_spheres.scene.js'
 // import scene from './scenes/experimental.scene.js'
 // import scene from './scenes/cylinder_ring.scene'
 // import scene from './scenes/spheres.scene.js'
 // import scene from './scenes/cornellbox.scene.js'
+import scene from './scenes/focused_ball.scene'
 // import scene from './scenes/furnace_test.js'
 
 const init = config => ({

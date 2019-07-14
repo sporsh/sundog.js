@@ -1,51 +1,4 @@
-const lightMaterial = {
-  lambertian: {
-    albedo: [0, 0, 0],
-    emittance: [10, 10, 10]
-    // emittance: [1, 1, 1]
-  }
-}
-
-const glassMaterial = {
-  // transmissive: {
-  fresnelSpecularTransmissive: {
-    albedo: [1, 1, 1],
-    // refractiveIndex: 1
-    refractiveIndex: 1.333
-    // refractiveIndex: 1.62
-  }
-}
-
-const mirrorMaterial = {
-  specular: {
-    albedo: [0.9, 0.9, 0.9],
-    emittance: [0, 0, 0]
-  }
-}
-
-const blackMaterial = {
-  lambertian: {
-    albedo: [0, 0, 0]
-  }
-}
-
-const whiteMaterial = {
-  lambertian: {
-    albedo: [0.8, 0.8, 0.8]
-  }
-}
-
-const redMaterial = {
-  lambertian: {
-    albedo: [0.75, 0.25, 0.25]
-  }
-}
-
-const greenMaterial = {
-  lambertian: {
-    albedo: [0.25, 0.75, 0.25]
-  }
-}
+import * as material from './materials'
 
 export default {
   maxDepth: 8,
@@ -69,7 +22,7 @@ export default {
         plane: {
           normal: [0, 0, -1],
           d: 0,
-          material: whiteMaterial
+          material: material.white
         }
       },
       // LEFT
@@ -77,9 +30,9 @@ export default {
         plane: {
           normal: [1, 0, 0],
           d: -1,
-          // material: whiteMaterial
-          material: blackMaterial
-          // material: lightMaterial
+          // material: material.white
+          material: material.black
+          // material: material.light
         }
       },
       // RIGHT
@@ -87,8 +40,8 @@ export default {
         plane: {
           normal: [-1, 0, 0],
           d: -1,
-          material: whiteMaterial
-          // material: lightMaterial
+          material: material.white
+          // material: material.light
         }
       },
       // CENTER SPLIT
@@ -96,8 +49,8 @@ export default {
         plane: {
           normal: [0, 1, 0],
           d: 0,
-          material: blackMaterial
-          // material: lightMaterial
+          material: material.black
+          // material: material.light
         }
       },
       // CENTER SPLIT
@@ -105,24 +58,24 @@ export default {
         plane: {
           normal: [0, -1, 0],
           d: 0,
-          material: blackMaterial
-          // material: lightMaterial
+          material: material.black
+          // material: material.light
         }
       },
       {
         plane: {
           normal: [0, 1, 0],
           d: 1,
-          material: blackMaterial
-          // material: lightMaterial
+          material: material.black
+          // material: material.light
         }
       },
       {
         plane: {
           normal: [0, -1, 0],
           d: 1,
-          material: blackMaterial
-          // material: lightMaterial
+          material: material.black
+          // material: material.light
         }
       },
 
@@ -131,14 +84,14 @@ export default {
         sphere: {
           center: [-0.7, 0.5, 0],
           radius: 0.2,
-          material: lightMaterial
+          material: material.light
         }
       },
       {
         sphere: {
           center: [-0.7, -0.5, 0],
           radius: 0.2,
-          material: lightMaterial
+          material: material.light
         }
       },
 
@@ -147,7 +100,7 @@ export default {
         sphere: {
           center: [0, 0.5, 0],
           radius: 0.3,
-          material: glassMaterial
+          material: material.glass
         }
       },
       // GLASS BALL
@@ -155,13 +108,13 @@ export default {
       //   sphere: {
       //     center: [0, -0.5, 0.7],
       //     radius: 0.3,
-      //     material: glassMaterial
+      //     material: material.glass
       //   }
       // },
       {
         implicit: {
           distancefunction: [{ dfSphere: 0.3 }, { dfTranslate: [0, -0.5, 0] }],
-          material: glassMaterial
+          material: material.glass
         }
       }
 
@@ -171,7 +124,7 @@ export default {
       //     b: [-0.8, -1, 0],
       //     a: [0, -1, 0],
       //     c: [0, 0, 0],
-      //     material: whiteMaterial
+      //     material: material.white
       //   }
       // },
       // // DIFFUSE TORUS
@@ -180,10 +133,10 @@ export default {
       //     major: 0.4,
       //     minor: 0.2,
       //     origin: [-0.4, 0.4, 0],
-      //     // material: redMaterial
-      //     // material: mirrorMaterial
-      //     material: glassMaterial
-      //     // material: whiteMaterial
+      //     // material: material.red
+      //     // material: material.mirror
+      //     material: material.glass
+      //     // material: material.white
       //   }
       // },
       // // DIFFUSE BOX
@@ -194,10 +147,10 @@ export default {
       //     radius: 0.05,
       //     // minor: 0.2,
       //     // origin: [-0.4, 0.4, 0],
-      //     // material: redMaterial
-      //     // material: mirrorMaterial
-      //     // material: glassMaterial
-      //     material: whiteMaterial
+      //     // material: material.red
+      //     // material: material.mirror
+      //     // material: material.glass
+      //     material: material.white
       //   }
       // }
       // DIFFUSE SPHERE
@@ -205,7 +158,7 @@ export default {
       //   sphere: {
       //     center: [-0.5, -0.6, 0.5],
       //     radius: 0.4,
-      //     material: mirrorMaterial
+      //     material: material.mirror
       //   }
       // },
       // MIRROR SPHERE
@@ -213,7 +166,7 @@ export default {
       //   sphere: {
       //     center: [0.5, -0.6, -0.5],
       //     radius: 0.4,
-      //     material: glassMaterial
+      //     material: material.glass
       //     // {
       //     // specular: {
       //     //   albedo: [0.9, 0.9, 0.9],

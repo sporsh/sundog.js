@@ -4,7 +4,7 @@ import * as basis from '../src/basis'
 import * as v3 from '../src/vector3'
 
 // const cameraPosition = v3.fromXYZ(3, 3, -5)
-const cameraPosition = v3.fromXYZ(0, 0.5, -3)
+const cameraPosition = v3.fromXYZ(0, 1, -3)
 const cameraLookAt = v3.fromXYZ(0, -0.5, 0)
 const cameraVector = v3.sub(cameraLookAt, cameraPosition)
 // const cameraVector = v3.sub(cameraPosition, cameraLookAt)
@@ -236,19 +236,19 @@ export default {
       //   }
       // }
 
-      // // SPHERE
-      // {
-      //   sphere: {
-      //     center: [0, -0.5, 0],
-      //     radius: 0.5,
-      //     // material: material.white
-      //     // material: material.light
-      //     // material: material.mirror
-      //     // material: material.checker
-      //     material: material.glass
-      //     // material: material.mirrorChecker
-      //   }
-      // }
+      // SPHERE
+      {
+        sphere: {
+          center: [0, -0.5, 0],
+          radius: 0.5,
+          // material: material.white
+          // material: material.light
+          // material: material.mirror
+          // material: material.checker
+          material: material.glass
+          // material: material.mirrorChecker
+        }
+      }
 
       // {
       //   implicit: {
@@ -275,26 +275,26 @@ export default {
       //   }
       // }
       //
-      {
-        implicit: {
-          distancefunction: [
-            { dfBox: [0.25, 0.5, 0.25] },
-            // { dfTwist: -Math.PI / 3 },
-            // { dfRotate: Math.PI / 4 },
-            // { dfRotate: Math.PI / 5 },
-            { dfTwist: Math.PI },
-            // { dfTranslate: [0.5, 0.5, 0.5] },
-            // { dfRepeat: [2, 2, 2] },
-            { dfTranslate: [0, -0.5, 0] }
-            // { dfTranslate: [-100, -100, 10] }
-            // { dfTranslate: [0.45, -0.6, -0.5] }
-          ],
-          material: material.white
-          // material: material.glass
-          // material: material.red
-          // material: material.checker
-        }
-      }
+      // {
+      //   implicit: {
+      //     distancefunction: [
+      //       { dfBox: [0.25, 0.5, 0.25] },
+      //       // { dfTwist: -Math.PI / 3 },
+      //       // { dfRotate: Math.PI / 4 },
+      //       // { dfRotate: Math.PI / 5 },
+      //       { dfTwist: Math.PI },
+      //       // { dfTranslate: [0.5, 0.5, 0.5] },
+      //       // { dfRepeat: [2, 2, 2] },
+      //       { dfTranslate: [0, -0.5, 0] }
+      //       // { dfTranslate: [-100, -100, 10] }
+      //       // { dfTranslate: [0.45, -0.6, -0.5] }
+      //     ],
+      //     material: material.white
+      //     // material: material.glass
+      //     // material: material.red
+      //     // material: material.checker
+      //   }
+      // }
 
       // // SPHERE
       // {

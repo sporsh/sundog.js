@@ -2,20 +2,26 @@ const lightMaterial = {
   lambertian: {
     // albedo: [0, 0, 0],
     albedo: [0.78, 0.78, 0.78],
-    emittance: [18.4, 15.6, 8]
+    // emittance: [184, 156, 80]
+    emittance: [
+      (18.4 / 18.4) * Math.PI * 50,
+      (15.6 / 18.4) * Math.PI * 50,
+      (8 / 18.4) * Math.PI * 50
+    ]
   }
 }
 
 const whiteMaterial = {
   lambertian: {
-    albedo: [0.74, 0.74, 0.74]
+    // albedo: [0.74, 0.74, 0.74]
+    albedo: [1, 1, 1]
   }
 }
 
 const redMaterial = {
   lambertian: {
     // albedo: [0.642, 0.287, 0.058]
-    albedo: [0.651, 0.115, 0.058]
+    albedo: [0.651 / 0.651, 0.115 / 0.651, 0.058 / 0.651]
   }
 }
 
@@ -23,7 +29,7 @@ const greenMaterial = {
   lambertian: {
     // albedo: [0.159, 0.481	, 0.285]
     // albedo: [0.159, 0.16, 0.285]
-    albedo: [0.159, 0.481, 0.16]
+    albedo: [0.159 / 0.481, 0.481 / 0.481, 0.16 / 0.481]
   }
 }
 

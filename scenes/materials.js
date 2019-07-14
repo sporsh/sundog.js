@@ -2,17 +2,19 @@ export const light = {
   lambertian: {
     // albedo: [1, 1, 1],
     albedo: [0, 0, 0],
-    // emittance: [20, 15, 10]
-    emittance: [10, 10, 10]
+    emittance: [20, 15, 10]
+    // emittance: [50, 50, 50]
   }
 }
 
 export const sky = {
   lambertian: {
     // albedo: [0.2, 0.2, 0.2],
-    albedo: [0, 0, 0],
-    emittance: [0xdd / 255, 0xee / 255, 1]
-    // emittance: [0.1, 0.1, 0.1]
+    // albedo: [0, 0, 0],
+    albedo: [1, 1, 1],
+    emittance: [0.85, 0.9, 1]
+    // emittance: [0.85 * Math.PI, 0.9 * Math.PI, Math.PI]
+    // emittance: [2, 2, 2]
   }
 }
 
@@ -20,8 +22,8 @@ export const glass = {
   // transmissive: {
   fresnelSpecularTransmissive: {
     // albedo: [0.9, 0.9, 0.9],
-    albedo: [0.75, 0.75, 0.75],
-    // albedo: [1, 1, 1],
+    // albedo: [0.9, 0.9, 0.9],
+    albedo: [1, 1, 1],
     // refractiveIndex: 1.8
     refractiveIndex: 1.62
     // refractiveIndex: 1.333
@@ -81,7 +83,7 @@ export const checkerCube = {
 
 export const checker = {
   checkerTexture: {
-    size: { x: 10, y: 10, z: 10 },
+    size: { x: 6, y: 12, z: 12 },
     white: { material: white },
     black: { material: black }
   }
