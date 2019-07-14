@@ -35,11 +35,21 @@ export const iterative = ({
       weight = v3.hadamard(weight, prob)
       weight = v3.scale(weight, 1 / pdf)
 
+      // if (depth > russianRouletteThreshold) {
+      //   const p = Math.max(weight.x, weight.y, weight.z)
+      //   if (Math.random() > p) {
+      //     return radiance
+      //   }
+      //   // Compensate for "lost" energy by randomly terminating path
+      //   weight = v3.scale(weight, 1 / p)
+      // }
+
       if (depth > russianRouletteThreshold) {
         const q = Math.max(0.05, 1 - Math.max(weight.x, weight.y, weight.z))
         if (Math.random() < q) {
           return radiance
         }
+        // Compensate for "lost" energy by randomly terminating path
         weight = v3.scale(weight, 1 / (1 - q))
       }
 

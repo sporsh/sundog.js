@@ -2,6 +2,7 @@ import { add, normalize, sub } from './vector3.js'
 import { fromStandardBasis } from './basis.js'
 
 const EPSILON = 0.00001
+// const EPSILON = 0.0000001
 
 export const rayThrough = ({
   position,

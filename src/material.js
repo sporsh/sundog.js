@@ -29,7 +29,7 @@ const lambertianBsdf = albedo => {
 
 export const lambertianMaterial = ({ albedo, emittance = v3.ZERO }) => () => ({
   bsdf: lambertianBsdf(albedo),
-  pdf: () => albedo,
+  pdf: () => v3.scale(albedo, 1 / Math.PI),
   scatter: lambertianScatter,
   emittance: () => emittance
 })
@@ -139,11 +139,38 @@ export const checkerCube = ({ black, white, size }) => ({ point }) => {
   return (x + y + z) % 2 ? white.material() : black.material()
 }
 
+// export const proceduralGridTexture = ({
+//   thickness = 0.01,
+//   grid,
+//   background
+// }) => {
+//   const delta = v => Math.abs(v - Math.floor(v + 0.5))
+//   const isline = v => (delta(v) < thickness ? true : false)
+//   return ({ point: { x, y, z } }) => {
+//     if (isline(x) || isline(z)) {
+//       return grid.material()
+//     } else {
+//       return background.material()
+//     }
+//     // isline(x) *	isline(y) * isline(z)
+//
+//     // const def eval(vec3 pos) vec3 :
+//     // 	vec3( grid(pos*10.0) * grid(pos*100.0) * grid(pos*1000.0) * 0.6 + 0.3)]]
+//   }
+// }
 
 export const proceduralGridTexture = ({ thickness = 0.01 }) => {
   const delta = v => Math.abs(v - Math.floor(v + 0.5))
   const isline = v => (delta(v) > thickness ? 1 : 0)
   const grid = ({ x, y, z }) => isline(x) * isline(z)
+  // const grid = ({ x, y, z }) => v3.fromXYZ(isline(x), isline(y), isline(z))
+  // const grid = ({ x, y, z }) => v3.fromXYZ(isline(x), isline(y), isline(z))
+  // const grid = ({ x, y, z }) => {
+  //   const r = isline(x)
+  //   const g = 0 //isline(y)
+  //   const b = isline(z)
+  //   return v3.fromXYZ(1 - b, 1 - r - b, 1 - r)
+  // }
 
   return ({ point }) => {
     const c =
@@ -156,6 +183,56 @@ export const proceduralGridTexture = ({ thickness = 0.01 }) => {
     return lambertianMaterial({ albedo: v3.fromXYZ(c, c, c) })()
   }
 }
+
+// export const proceduralGridTexture = ({ thickness = 0.01 }) => {
+//   const delta = v => Math.abs(v - Math.floor(v + 0.5))
+//   const isline = v => (delta(v) < thickness ? 1 : 0)
+//   // const grid = ({ x, y, z }) => isline(x) * isline(z)
+//   // const grid = ({ x, y, z }) => v3.fromXYZ(isline(x), isline(y), isline(z))
+//   // const grid = ({ x, y, z }) => v3.fromXYZ(isline(x), isline(y), isline(z))
+//   const grid = ({ x, y, z }) => {
+//     const r = isline(x)
+//     const g = 0 //isline(y)
+//     const b = isline(z)
+//     return v3.fromXYZ(1 - b, 1 - r - b, 1 - r)
+//   }
+//
+//   return ({ point }) => {
+//     // const c =
+//     //   grid(point) *
+//     //     grid(v3.scale(point, 10.0)) *
+//     //     grid(v3.scale(point, 100.0)) *
+//     //     0.6 +
+//     //   0.3
+//     // return lambertianMaterial({ albedo: v3.fromXYZ(c, c, c) })()
+//
+//     // const c = v3.addAll(
+//     //   v3.scale(
+//     //     v3.hadamard(
+//     //       v3.hadamard(grid(point), grid(v3.scale(point, 10.0))),
+//     //       grid(v3.scale(point, 100.0))
+//     //     ),
+//     //     0.6
+//     //   ),
+//     //   0.3
+//     // )
+//     // const c = v3.sub(
+//     //   v3.fromXYZ(1, 1, 1),
+//     //   v3.scale(v3.hadamard(grid(point), v3.fromXYZ(1, 0, 1)), 0.5)
+//     // )
+//     const c = v3.scale(grid(point), 0.9)
+//     return lambertianMaterial({ albedo: c })()
+//     // if (isline(x) * isline(z)) {
+//     //   return grid.material()
+//     // } else {
+//     //   return background.material()
+//     // }
+//     // isline(x) *	isline(y) * isline(z)
+//
+//     // const def eval(vec3 pos) vec3 :
+//     // 	vec3( grid(pos*10.0) * grid(pos*100.0) * grid(pos*1000.0) * 0.6 + 0.3)]]
+//   }
+// }
 
 export const checkerTexture = ({ black, white, size }) => ({
   point,
