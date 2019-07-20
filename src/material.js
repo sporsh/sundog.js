@@ -325,3 +325,34 @@ const sphericalPhi = ({ x, y, z }) => {
 const clamp = (min, max) => value => Math.max(min, Math.min(value, max))
 
 const clampUnit = clamp(-1, 1)
+
+import * as v2 from './vector2'
+import * as sdf2d from './sdf2d'
+
+export const sdf2dtexture = ({ black, white }) => ({ point }) => {
+  let p2d = v2.fromXY(point.x, point.z)
+  // let p2d = sdf2d.fTranslate(v2.fromXY(0.5, 0.5))(v2.fromXY(point.x, point.z))
+  // p2d = v2.mod(p2d, v2.fromXY(1, 1))
+  p2d = sdf2d.fTranslate(v2.fromXY(0.5, 0))(p2d)
+  p2d = sdf2d.fRepeat(v2.fromXY(1, 1))(p2d)
+  // const p2d = v2.mod(v2.fromXY(point.x, point.z), 2)
+
+  // const d = sdf2d.dCircle({ radius: 0.5 })(p2d)
+
+  // const d = sdf2d.dCircle({ radius: 1 })(sdf2d.fTranslate(0, 0)(p2d))
+  // const d = sdf2d.dX({ width: 0.01 })(v2.fromXY(point.x, point.z))
+  // const d = sdf2d.dLine({ n: { x: 1, y: 0 }, width: 0.01 })(
+  // const d = sdf2d.fUnion([
+  //   // const d = sdf2d.fIntersect([
+  //   // const d = sdf2d.fSubtract([
+  //   sdf2d.dLine({ n: v2.normalize({ x: 1, y: 1 }), width: 0.01 }),
+  //   sdf2d.dLine({ n: v2.normalize({ x: -1, y: 1 }), width: 0.01 })
+  // ])(p2d)
+
+  const d = sdf2d.fIntersect([
+    sdf2d.dLine({ n: v2.normalize({ x: 1, y: 1 }), width: Math.sqrt(2) / 4 }),
+    sdf2d.dLine({ n: v2.normalize({ x: -1, y: 1 }), width: Math.sqrt(2) / 4 })
+  ])(p2d)
+
+  return d < 0 ? black.material() : white.material()
+}

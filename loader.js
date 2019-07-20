@@ -23,7 +23,8 @@ import {
   dfUnion,
   dfDisplace,
   dfRepeat,
-  intersect
+  intersect,
+  dRound
 } from './src/distancefield.js'
 
 export const load = json => {
@@ -67,6 +68,8 @@ const reviver = (key, value) => {
       return material.proceduralGridTexture(value)
     case 'checkerTexture':
       return material.checkerTexture(value)
+    case 'sdf2dtexture':
+      return material.sdf2dtexture(value)
     case 'material':
       return Object.values(value)[0]
     case 'geometry':
@@ -97,6 +100,8 @@ const reviver = (key, value) => {
       return dfUnion(value.map(v => v.distancefunction))
     case 'dfSphere':
       return dfSphere(value)
+    case 'dRound':
+      return dRound(value)
     // return dfDisplace(2)(dfSphere(value))
     case 'dfBox':
       return dfBox(v3.fromXYZ(...value))

@@ -6,7 +6,8 @@ import * as dat from 'dat.gui'
 // import scene from './scenes/cylinder_ring.scene'
 // import scene from './scenes/spheres.scene.js'
 // import scene from './scenes/cornellbox.scene.js'
-import scene from './scenes/focused_ball.scene'
+// import scene from './scenes/focused_ball.scene'
+import scene from './scenes/sdftexture.scene'
 // import scene from './scenes/furnace_test.js'
 
 const init = config => ({

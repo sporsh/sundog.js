@@ -131,8 +131,7 @@ const normalAtPoint = (distanceFunction, point, epsilon) => {
   )
 }
 
-const round = radius => distanceFunction => point =>
-  distanceFunction(point) - radius
+export const dRound = radius => d => d - radius
 
 export const dfSphere = radius => point => v3.length(point) - radius
 

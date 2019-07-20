@@ -19,8 +19,8 @@ export const sky = {
 }
 
 export const glass = {
-  // transmissive: {
-  fresnelSpecularTransmissive: {
+  transmissive: {
+    // fresnelSpecularTransmissive: {
     // albedo: [0.9, 0.9, 0.9],
     // albedo: [0.9, 0.9, 0.9],
     albedo: [1, 1, 1],
@@ -109,5 +109,12 @@ export const redAndGreenChecker = {
     size: { x: 10, y: 10, z: 10 },
     white: { material: sky },
     black: { material: white }
+  }
+}
+
+export const sdftexture = {
+  sdf2dtexture: {
+    white: { material: white },
+    black: { material: black }
   }
 }
