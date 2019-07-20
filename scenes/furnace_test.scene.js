@@ -1,4 +1,4 @@
-import { quad, block } from '../helpers'
+import { quad, block } from './helpers'
 
 const lightMaterial = {
   lambertian: {

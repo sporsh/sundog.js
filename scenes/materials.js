@@ -1,8 +1,10 @@
 export const light = {
   lambertian: {
-    // albedo: [1, 1, 1],
-    albedo: [0, 0, 0],
-    emittance: [20, 15, 10]
+    albedo: [1, 1, 1],
+    // albedo: [0, 0, 0],
+    // emittance: [1, 1, 1]
+    // emittance: [20, 15, 10]
+    emittance: [2, 1.5, 1]
     // emittance: [50, 50, 50]
   }
 }
@@ -10,17 +12,21 @@ export const light = {
 export const sky = {
   lambertian: {
     // albedo: [0.2, 0.2, 0.2],
-    // albedo: [0, 0, 0],
-    albedo: [1, 1, 1],
-    emittance: [0.85, 0.9, 1]
-    // emittance: [0.85 * Math.PI, 0.9 * Math.PI, Math.PI]
+    albedo: [0, 0, 0],
+    // albedo: [1, 1, 1],
+    // emittance: [0.85, 0.9, 1]
+    // emittance: [0.85, 0.9, 1]
+    // emittance: [1, 1, 1]
+    // emittance: [0.5, 0.5, 0.5]
+    // emittance: [0.85 * 2, 0.9 * 2, 1 * 2]
+    emittance: [0.85 * Math.PI, 0.9 * Math.PI, Math.PI]
     // emittance: [2, 2, 2]
   }
 }
 
 export const glass = {
-  transmissive: {
-    // fresnelSpecularTransmissive: {
+  // transmissive: {
+  fresnelSpecularTransmissive: {
     // albedo: [0.9, 0.9, 0.9],
     // albedo: [0.9, 0.9, 0.9],
     albedo: [1, 1, 1],
@@ -51,7 +57,8 @@ export const mirror = {
 
 export const white = {
   lambertian: {
-    albedo: [0.8, 0.8, 0.8]
+    albedo: [1, 1, 1]
+    // albedo: [0.8, 0.8, 0.8]
   }
 }
 

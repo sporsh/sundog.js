@@ -4,7 +4,7 @@ import * as basis from '../src/basis'
 import * as v3 from '../src/vector3'
 
 // const cameraPosition = v3.fromXYZ(3, 3, -5)
-const cameraPosition = v3.fromXYZ(0, 2, -3)
+const cameraPosition = v3.fromXYZ(0, 1, -3)
 const cameraLookAt = v3.fromXYZ(0, -0.7, 0)
 const cameraVector = v3.sub(cameraLookAt, cameraPosition)
 // const cameraVector = v3.sub(cameraPosition, cameraLookAt)
@@ -37,51 +37,6 @@ export default {
   },
   geometry: {
     group: [
-      // ...env.cornellBox,
-
-      {
-        sphere: {
-          center: [0, -1, 0],
-          radius: 100,
-          material: material.sky
-          // material: {
-          //   lambertian: {
-          //     // albedo: [0.8, 0.8, 0.8]
-          //     albedo: [0, 0, 0],
-          //     emittance: [0.5, 0.5, 0.5]
-          //     // emittance: [0xdd / 255, 0xee / 255, 1]
-          //     // [0xed / 255, 0xf9 / 255, 0xff / 255]
-          //     // [0.8, 0.8, 0.8]
-          //   }
-          // }
-        }
-      },
-      // LIGHT
-      {
-        sphere: {
-          center: [-3, 3, -3],
-          radius: 2,
-          material: material.light
-        }
-      },
-      // GROUND
-      {
-        plane: {
-          normal: [0, 1, 0],
-          d: -1,
-          // material: material.checkerCube
-          material: material.sdftexture
-          // material: {
-          //   lambertian: {
-          //     // albedo: [0xff / 255, 0xe7 / 255, 0xd9 / 255]
-          //     // albedo: [0.4, 0.25, 0.25]
-          //     // albedo: [0.5, 0.5, 0.5]
-          //     albedo: [0.5, 0.5, 0.5]
-          //     // emittance: [0.1, 0.1, 0.1]
-          //   }
-          // }
-        }
-      },
       // ...env.cheapCornellBox,
 
       // // SPHERE LIGHT
@@ -136,7 +91,7 @@ export default {
       //   }
       // }
       //
-      // // CYLINDER RING
+      // // GLASS CUP
       // {
       //   implicit: {
       //     distancefunction: [
@@ -144,13 +99,15 @@ export default {
       //         dfSubtract: [
       //           {
       //             distancefunction: [
+      //               { dRound: 0.05 },
       //               { dfCylinder: { height: 0.4, radius: 0.35 } }
       //             ]
       //           },
       //           {
       //             distancefunction: [
+      //               { dRound: 0.05 },
       //               { dfCylinder: { height: 0.5, radius: 0.345 } },
-      //               { dfTranslate: [0.0, 0.2, 0] }
+      //               { dfTranslate: [0.0, 0.3, 0] }
       //             ]
       //           }
       //         ]
@@ -162,7 +119,7 @@ export default {
       //     // material: material.mirror
       //     material: material.glass
       //   }
-      // }
+      // },
 
       // // TWISTED BOX
       // {
@@ -170,44 +127,63 @@ export default {
       //     distancefunction: [
       //       { dfBox: [0.3, 0.3, 0.3] },
       //       { dfTwist: Math.PI },
-      //       { dfTranslate: [0.35, -0.75, -0.35] }
+      //       { dfTranslate: [0, -0.75, 0] }
       //     ],
-      //     material: material.white
-      //     // material: material.glass
+      //     // material: material.white
+      //     material: material.glass
       //     // material: material.red
       //   }
-      // }
+      // },
 
-      // BUBBLE - SPHERE
-      {
-        implicit: {
-          distancefunction: [
-            {
-              dfSubtract: [
-                { distancefunction: [{ dfSphere: 0.5 }] },
-                // { distancefunction: [{ dfBox: [0.5, 0.5, 0.5] }] },
-                {
-                  distancefunction: [
-                    { dfSphere: 0.48 }
-                    // { dfTranslate: [0, 0, 0] }
-                  ]
-                }
-              ]
-            },
-            // { dfRotate: Math.PI / 3 }
-            // { dfSphere: 0.5 }
-            // { dfOctahedron: 0.5 }
-            // { dfTorus: { major: 0.25, minor: 0.15 } },
-            // { dfBox: [0.25, 0.6, 0.25] },
-            // { dfTwist: Math.PI }
-            // { dfTwist: 6 }
-            { dfTranslate: [0, -0.5, 0] }
-          ],
-          // material: material.white
-          // material: material.red
-          material: material.glass
-        }
-      }
+      // // BUBBLE - SPHERE
+      // {
+      //   implicit: {
+      //     distancefunction: [
+      //       {
+      //         dfSubtract: [
+      //           { distancefunction: [{ dfSphere: 0.5 }] },
+      //           // { distancefunction: [{ dfBox: [0.5, 0.5, 0.5] }] },
+      //           {
+      //             distancefunction: [
+      //               { dfSphere: 0.48 }
+      //               // { dfTranslate: [0, 0.2, 0] }
+      //             ]
+      //           }
+      //         ]
+      //       },
+      //       // { dfRotate: Math.PI / 3 }
+      //       // { dfSphere: 0.5 }
+      //       // { dfOctahedron: 0.5 }
+      //       // { dfTorus: { major: 0.25, minor: 0.15 } },
+      //       // { dfBox: [0.25, 0.6, 0.25] },
+      //       // { dfTwist: Math.PI }
+      //       // { dfTwist: 6 }
+      //       { dfTranslate: [0, -0.5, 0] }
+      //     ],
+      //     // material: material.white
+      //     // material: material.red
+      //     material: material.glass
+      //   }
+      // },
+
+      // // IMPLLICIT - SPHERE
+      // {
+      //   implicit: {
+      //     distancefunction: [
+      //       // { dfRotate: Math.PI / 3 }
+      //       { dfSphere: 0.5 },
+      //       // { dfOctahedron: 0.5 }
+      //       // { dfTorus: { major: 0.25, minor: 0.15 } },
+      //       // { dfBox: [0.25, 0.6, 0.25] },
+      //       // { dfTwist: Math.PI }
+      //       // { dfTwist: 6 }
+      //       { dfTranslate: [0, -0.5, 0] }
+      //     ],
+      //     // material: material.white
+      //     // material: material.red
+      //     material: material.glass
+      //   }
+      // }
 
       // // BOTTOM WATER
       // {
@@ -284,42 +260,51 @@ export default {
       // {
       //   implicit: {
       //     distancefunction: [
-      //       { dfBox: [0.3, 0.6, 0.3] },
+      //       { dfBox: [0.3, 0.4, 0.3] },
       //       { dfRotate: -Math.PI / 10 },
-      //       { dfTranslate: [-0.35, -0.4, 0.3] }
+      //       { dfTranslate: [0, -0.7, 0] }
       //     ],
-      //     material: material.white
-      //     // material: material.glass
+      //     // material: material.white
+      //     material: material.glass
       //     // material: material.red
       //   }
       // }
 
-      // // SPHERE
-      // {
-      //   sphere: {
-      //     center: [0, -0.5, 0],
-      //     radius: 0.5,
-      //     // material: material.white
-      //     // material: material.light
-      //     // material: material.mirror
-      //     // material: material.checker
-      //     material: material.glass
-      //     // material: material.mirrorChecker
-      //   }
-      // },
-      // // INVERSE SPHERE
-      // {
-      //   sphere: {
-      //     center: [0, -0.5, 0],
-      //     radius: -0.48,
-      //     // material: material.white
-      //     // material: material.light
-      //     // material: material.mirror
-      //     // material: material.checker
-      //     material: material.glass
-      //     // material: material.mirrorChecker
-      //   }
-      // }
+      // SPHERE
+      {
+        sphere: {
+          center: [0, -0.5, 0],
+          radius: 0.5,
+          // material: material.light
+          // material: material.mirror
+          // material: material.checker
+          // material: material.white
+          material: material.glass
+          // material: material.mirrorChecker
+        }
+      },
+      // REFERENCE SPHERES
+      {
+        sphere: {
+          center: [-0.8, -0.8, 1],
+          radius: -0.2,
+          material: material.checker
+        }
+      },
+      {
+        sphere: {
+          center: [0, -0.8, 1],
+          radius: -0.2,
+          material: material.checker
+        }
+      },
+      {
+        sphere: {
+          center: [0.8, -0.8, 1],
+          radius: -0.2,
+          material: material.checker
+        }
+      },
 
       // {
       //   implicit: {
@@ -367,27 +352,61 @@ export default {
       //   }
       // }
 
-      // // SPHERE
+      // ENVIONMENT
+
+      // UNIFORM LIGHT
+      {
+        sphere: {
+          center: [0, -1, 0],
+          radius: 100,
+          material: material.sky
+          // material: {
+          //   lambertian: {
+          //     // albedo: [0.8, 0.8, 0.8]
+          //     albedo: [0, 0, 0],
+          //     emittance: [0.5, 0.5, 0.5]
+          //     // emittance: [0xdd / 255, 0xee / 255, 1]
+          //     // [0xed / 255, 0xf9 / 255, 0xff / 255]
+          //     // [0.8, 0.8, 0.8]
+          //   }
+          // }
+        }
+      },
+      // LIGHT
+      {
+        sphere: {
+          center: [-3, 3, 3],
+          radius: 2,
+          material: material.light
+        }
+      },
+      // // LIGHT
       // {
       //   sphere: {
-      //     center: [-0.5, -0.6, 0.5],
-      //     radius: 0.4,
-      //     // material: material.white
-      //     // material: material.glass
-      //     material: material.mirror
+      //     center: [-3, 3, -3],
+      //     radius: 2,
+      //     material: material.light
       //   }
       // },
-      // // SPHERE
-      // {
-      //   sphere: {
-      //     center: [0.5, -0.6, -0.5],
-      //     // radius: 0,
-      //     radius: 0.4,
-      //     // material: material.white
-      //     // material: material.mirror
-      //     material: material.glass
-      //   }
-      // }
+      // GROUND
+      {
+        plane: {
+          normal: [0, 1, 0],
+          d: -1,
+          // material: material.checkerCube
+          // material: material.sdftexture
+          material: material.grid
+          // material: {
+          //   lambertian: {
+          //     // albedo: [0xff / 255, 0xe7 / 255, 0xd9 / 255]
+          //     // albedo: [0.4, 0.25, 0.25]
+          //     // albedo: [0.5, 0.5, 0.5]
+          //     albedo: [0.5, 0.5, 0.5]
+          //     // emittance: [0.1, 0.1, 0.1]
+          //   }
+          // }
+        }
+      }
     ]
   }
 }
