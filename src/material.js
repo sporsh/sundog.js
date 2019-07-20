@@ -43,11 +43,11 @@ export const specularMaterial = ({ albedo, emittance = v3.ZERO }) => () => ({
   emittance: () => emittance
 })
 
-export const transmissiveMaterial = () => ({
+export const transmissiveMaterial = ({
   albedo,
   emittance = v3.ZERO,
   refractiveIndex
-}) => ({
+}) => () => ({
   pdf: () => albedo,
   scatter: (incoming, { normal }) => {
     const cosi = v3.dot(normal, incoming)
@@ -66,14 +66,20 @@ export const transmissiveMaterial = () => ({
     const cost2 = 1 - eta * eta * (1 - cosi * cosi)
     if (cost2 < 0) {
       // Total internal reflection
-      return v3.sub(incoming, v3.scale(normal_, 2 * cosi))
+      return {
+        direction: v3.normalize(v3.sub(incoming, v3.scale(normal_, 2 * cosi))),
+        pdf: 1
+      }
     }
-    return v3.normalize(
-      v3.sub(
-        v3.scale(incoming, eta),
-        v3.scale(normal_, eta * Math.abs(cosi) + Math.sqrt(cost2))
-      )
-    )
+    return {
+      direction: v3.normalize(
+        v3.sub(
+          v3.scale(incoming, eta),
+          v3.scale(normal_, eta * Math.abs(cosi) + Math.sqrt(cost2))
+        )
+      ),
+      pdf: 1
+    }
   },
   emittance: () => emittance
 })
@@ -106,13 +112,13 @@ export const fresnelSpecularTransmissiveMaterial = ({
     if (sint >= 1) {
       //  Total internal reflection
       return {
-        direction: v3.sub(incoming, v3.scale(normal_, 2 * cosi)),
+        direction: v3.normalize(v3.sub(incoming, v3.scale(normal_, 2 * cosi))),
         pdf: 1
       }
     } else {
       const cost = Math.sqrt(Math.max(0, 1 - sint * sint))
       const fresnel = frDiel(Math.abs(cosi), cost, etai, etat) < Math.random()
-      if (fresnel) {
+      if (Math.random() < fresnel) {
         return {
           direction: v3.normalize(
             v3.sub(
@@ -124,7 +130,9 @@ export const fresnelSpecularTransmissiveMaterial = ({
         }
       } else {
         return {
-          direction: v3.sub(incoming, v3.scale(normal_, 2 * cosi)),
+          direction: v3.normalize(
+            v3.sub(incoming, v3.scale(normal_, 2 * cosi))
+          ),
           pdf: 1 - fresnel
         }
       }
