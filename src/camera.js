@@ -1,5 +1,5 @@
-import { add, normalize, sub } from './vector3.js'
-import { fromStandardBasis } from './basis.js'
+import { add, normalize, sub } from './vector3'
+import { toStandardBasis } from './basis'
 
 const EPSILON = 0.00001
 // const EPSILON = 0.0000001
@@ -13,10 +13,10 @@ export const rayThrough = ({
   tMin = EPSILON,
   tMax = Infinity
 }) => (u, v) => {
-  const origin = randomOriginWithinAperture({ position, aperture })
+  const origin = randomOriginWithinAperture(aperture, position, basis)
   const target = add(
     position,
-    fromStandardBasis(basis, {
+    toStandardBasis(basis, {
       x: u * fieldOfView * focalLength,
       y: v * fieldOfView * focalLength,
       z: focalLength
@@ -26,12 +26,12 @@ export const rayThrough = ({
   return { origin, direction, tMin, tMax }
 }
 
-const randomOriginWithinAperture = ({ position, aperture }) => {
+const randomOriginWithinAperture = (aperture, position, basis) => {
   if (aperture == 0) {
     return position
   } else {
     const { x, y } = randomPointOnDisc(aperture)
-    return add(position, { x, y, z: 0 })
+    return add(position, toStandardBasis(basis, { x, y, z: 0 }))
   }
 }
 
