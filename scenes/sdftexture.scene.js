@@ -4,8 +4,8 @@ import * as basis from '../src/basis'
 import * as v3 from '../src/vector3'
 
 // const cameraPosition = v3.fromXYZ(3, 3, -5)
-const cameraPosition = v3.fromXYZ(0, 1, -3)
-const cameraLookAt = v3.fromXYZ(0, -0.7, 0)
+const cameraPosition = v3.fromXYZ(2, 2, -3)
+const cameraLookAt = v3.fromXYZ(0, -0.8, 0)
 const cameraVector = v3.sub(cameraLookAt, cameraPosition)
 // const cameraVector = v3.sub(cameraPosition, cameraLookAt)
 const cameraFocalLenght = v3.length(cameraVector)
@@ -127,7 +127,7 @@ export default {
       //     distancefunction: [
       //       { dfBox: [0.3, 0.3, 0.3] },
       //       { dfTwist: Math.PI },
-      //       { dfTranslate: [0, -0.75, 0] }
+      //       { dfTranslate: [0, -0.701, 0] }
       //     ],
       //     // material: material.white
       //     material: material.glass
@@ -278,29 +278,38 @@ export default {
           // material: material.light
           // material: material.mirror
           // material: material.checker
-          // material: material.white
-          material: material.glass
+          material: material.white
+          // material: material.glass
+          // material: material.checkerGlassMirror
           // material: material.mirrorChecker
         }
       },
+
       // REFERENCE SPHERES
       {
         sphere: {
-          center: [-0.8, -0.8, 1],
+          center: [-1, -0.8, 0],
+          radius: -0.2,
+          material: material.red
+        }
+      },
+      {
+        sphere: {
+          center: [0, -0.8, -1],
           radius: -0.2,
           material: material.checker
+        }
+      },
+      {
+        sphere: {
+          center: [1, -0.8, 0],
+          radius: -0.2,
+          material: material.green
         }
       },
       {
         sphere: {
           center: [0, -0.8, 1],
-          radius: -0.2,
-          material: material.checker
-        }
-      },
-      {
-        sphere: {
-          center: [0.8, -0.8, 1],
           radius: -0.2,
           material: material.checker
         }
@@ -354,32 +363,14 @@ export default {
 
       // ENVIONMENT
 
-      // UNIFORM LIGHT
-      {
-        sphere: {
-          center: [0, -1, 0],
-          radius: 100,
-          material: material.sky
-          // material: {
-          //   lambertian: {
-          //     // albedo: [0.8, 0.8, 0.8]
-          //     albedo: [0, 0, 0],
-          //     emittance: [0.5, 0.5, 0.5]
-          //     // emittance: [0xdd / 255, 0xee / 255, 1]
-          //     // [0xed / 255, 0xf9 / 255, 0xff / 255]
-          //     // [0.8, 0.8, 0.8]
-          //   }
-          // }
-        }
-      },
-      // LIGHT
-      {
-        sphere: {
-          center: [-3, 3, 3],
-          radius: 2,
-          material: material.light
-        }
-      },
+      // // LIGHT
+      // {
+      //   sphere: {
+      //     center: [-3, 3, 3],
+      //     radius: 2,
+      //     material: material.light
+      //   }
+      // },
       // // LIGHT
       // {
       //   sphere: {
@@ -388,6 +379,7 @@ export default {
       //     material: material.light
       //   }
       // },
+
       // GROUND
       {
         plane: {
@@ -405,6 +397,15 @@ export default {
           //     // emittance: [0.1, 0.1, 0.1]
           //   }
           // }
+        }
+      },
+
+      // UNIFORM LIGHT
+      {
+        sphere: {
+          center: [0, -1, 0],
+          radius: 100,
+          material: material.sky
         }
       }
     ]

@@ -16,10 +16,14 @@ export const iterative = ({
       const emittance = material.emittance(ray.direction)
       radiance = v3.add(radiance, v3.hadamard(emittance, weight))
 
-      const { direction, prob, pdf } = material.scatter(ray.direction, basis)
+      const pdf = material.pdf()
+      if (Math.max(pdf.x, pdf.y, pdf.z) <= 0) {
+        return radiance
+      }
+      weight = v3.hadamard(weight, pdf)
 
-      weight = v3.hadamard(weight, prob)
-      weight = v3.scale(weight, pdf)
+      const direction = material.scatter(ray.direction, basis)
+      // weight = v3.hadamard(weight, prob)
 
       // if (depth > russianRouletteThreshold) {
       //   const p = Math.max(weight.x, weight.y, weight.z)

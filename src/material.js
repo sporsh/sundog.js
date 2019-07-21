@@ -8,7 +8,8 @@ import * as basis from './basis.js'
 // }
 export const lambertianMaterial = ({ albedo, emittance = v3.ZERO }) => () => ({
   // bsdf: lambertianBsdf(albedo),
-  pdf: () => v3.scale(albedo, 1 / Math.PI),
+  emittance: () => emittance,
+  pdf: () => albedo,
   scatter: (incoming, surfaceBasis) => {
     const u1 = Math.random()
     const u2 = Math.random()
@@ -18,30 +19,23 @@ export const lambertianMaterial = ({ albedo, emittance = v3.ZERO }) => () => ({
 
     const phi = 2 * Math.PI * u2
 
-    const direction = v3.normalize(
+    return v3.normalize(
       basis.toStandardBasis(surfaceBasis, {
         x: sinTheta * Math.cos(phi),
         y: sinTheta * Math.sin(phi),
         z: cosTheta
       })
     )
-
-    // return { direction, pdf: 1, prob: albedo }
-    return { direction, pdf: Math.PI, prob: v3.scale(albedo, 1 / Math.PI) }
-  },
-  emittance: () => v3.scale(emittance, 1 / Math.PI)
+  }
 })
 
 export const specularMaterial = ({ albedo, emittance = v3.ZERO }) => () => ({
   pdf: () => albedo,
-  scatter: (incoming, { normal }) => ({
-    direction: v3.normalize(
+  emittance: () => emittance,
+  scatter: (incoming, { normal }) =>
+    v3.normalize(
       v3.sub(incoming, v3.scale(normal, 2 * v3.dot(normal, incoming)))
-    ),
-    pdf: 1,
-    prob: albedo
-  }),
-  emittance: () => emittance
+    )
 })
 
 const fresnelDielectric = (cosThetaI, etaI, etaT) => {
@@ -117,46 +111,17 @@ export const fresnelSpecularTransmissiveMaterial = ({
     const fresnel = fresnelDielectric(cosTheta(wo), 1, refractiveIndex)
     if (Math.random() < fresnel) {
       // Specular reflection
-      const wi = v3.fromXYZ(-wo.x, -wo.y, wo.z)
-      const pdf = 1 / fresnel
-      // const fr = albedo
-      // const wi = v3.fromXYZ(-wo.x, -wo.y, wo.z)
-      // const pdf = absCosTheta(wi) * fresnel
-      // const fr = v3.scale(albedo, absCosTheta(wi) * fresnel)
-      // const wi = v3.fromXYZ(-wo.x, -wo.y, wo.z)
-      // const pdf = fresnel
-      const fr = v3.scale(albedo, fresnel)
-
-      return {
-        direction: basis.toStandardBasis(surfaceBasis, wi),
-        pdf,
-        prob: fr
-        // prob: v3.fromXYZ(fresnel, fresnel, fresnel)
-        // prob: albedo
-      }
+      return basis.toStandardBasis(surfaceBasis, v3.fromXYZ(-wo.x, -wo.y, wo.z))
     } else {
       // Specular transmission
       const entering = cosTheta(wo) > 0
       const etaI = entering ? 1 : refractiveIndex
       const etaT = entering ? refractiveIndex : 1
 
-      const wt = refract(wo, faceForward(v3.fromXYZ(0, 0, 1), wo), etaI / etaT)
-      const pdf = 1 / (1 - fresnel)
-      // const ft = albedo
-      // const wt = refract(wo, faceForward(v3.fromXYZ(0, 0, 1), wo), etaI / etaT)
-      // const pdf = absCosTheta(wt) * (1 - fresnel)
-      // const ft = v3.scale(albedo, absCosTheta(wt) * (1 - fresnel))
-      // const wt = refract(wo, faceForward(v3.fromXYZ(0, 0, 1), wo), etaI / etaT)
-      // const pdf = 1 - fresnel
-      const ft = v3.scale(albedo, 1 - fresnel)
-
-      return {
-        direction: basis.toStandardBasis(surfaceBasis, wt),
-        pdf,
-        prob: ft
-        // prob: v3.fromXYZ(1 - fresnel, 1 - fresnel, 1 - fresnel)
-        // prob: albedo
-      }
+      return basis.toStandardBasis(
+        surfaceBasis,
+        refract(wo, faceForward(v3.fromXYZ(0, 0, 1), wo), etaI / etaT)
+      )
     }
   }
 })

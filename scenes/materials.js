@@ -15,11 +15,11 @@ export const sky = {
     albedo: [0, 0, 0],
     // albedo: [1, 1, 1],
     // emittance: [0.85, 0.9, 1]
-    // emittance: [0.85, 0.9, 1]
+    emittance: [0.85, 0.9, 1]
     // emittance: [1, 1, 1]
     // emittance: [0.5, 0.5, 0.5]
     // emittance: [0.85 * 2, 0.9 * 2, 1 * 2]
-    emittance: [0.85 * Math.PI, 0.9 * Math.PI, Math.PI]
+    // emittance: [0.85 * Math.PI, 0.9 * Math.PI, Math.PI]
     // emittance: [2, 2, 2]
   }
 }
@@ -30,6 +30,7 @@ export const glass = {
     // albedo: [0.9, 0.9, 0.9],
     // albedo: [0.9, 0.9, 0.9],
     albedo: [1, 1, 1],
+    // albedo: [0.8, 0.85, 0.9],
     // refractiveIndex: 1.8
     refractiveIndex: 1.62
     // refractiveIndex: 1.333
@@ -57,8 +58,8 @@ export const mirror = {
 
 export const white = {
   lambertian: {
-    albedo: [1, 1, 1]
-    // albedo: [0.8, 0.8, 0.8]
+    // albedo: [1, 1, 1]
+    albedo: [0.8, 0.8, 0.8]
   }
 }
 
@@ -80,6 +81,12 @@ export const green = {
   }
 }
 
+export const blue = {
+  lambertian: {
+    albedo: [0.25, 0.25, 0.75]
+  }
+}
+
 export const checkerCube = {
   checkerCube: {
     size: { x: 3, y: 3, z: 3 },
@@ -93,6 +100,14 @@ export const checker = {
     size: { x: 6, y: 12, z: 12 },
     white: { material: white },
     black: { material: black }
+  }
+}
+
+export const checkerGlassMirror = {
+  checkerTexture: {
+    size: { x: 6, y: 12, z: 12 },
+    white: { material: glass },
+    black: { material: mirror }
   }
 }
 
